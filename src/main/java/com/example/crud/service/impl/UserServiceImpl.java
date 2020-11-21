@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +34,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> findById(Long userId) {
         return userRepository.findById(userId);
+    }
+
+    @Override
+    public User findByName(String userName) {
+        List<User> userList= findAllUser();
+        for(User user: userList){
+            if(user.getUserName().equals(userName)){
+                return user;
+            }
+        }
+        logger.error("UserName not exist");
+        return null;
     }
 //
 //    @Override

@@ -17,5 +17,7 @@ public class InputParam {
     public static final String STATUS= "status";
     public static final String INCREASE= "increase";
     public static final String DECREASE= "decrease";
+    public static final String USER_NAME= "aud";
+    public static final String ROLE= "sub";
 
 }

@@ -2,12 +2,14 @@ package com.example.crud.controller;
 
 import com.example.crud.entity.LoginUser;
 import com.example.crud.entity.User;
+import com.example.crud.security.AuthorizationWithToken;
 import com.example.crud.service.UserService;
 import com.nimbusds.jose.util.Base64URL;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.Base64UrlCodec;
+import net.minidev.json.parser.JSONParser;
 import org.hibernate.hql.internal.ast.util.TokenPrinters;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,29 @@ import java.util.List;
 public class LoginController {
     public static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-//    public LoginController()
-//    @PostMapping(value = "/authenticate")
-//    public ResponseEntity<String> authorize(@RequestBody LoginUser loginUser){
-//        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken= new UsernamePasswordAuthenticationToken(loginUser.getUserName(), loginUser.getPassword());
-//        Authentication authentication= usernamePasswordAuthenticationToken
-//    }
+    private UserService userService;
 
+    @Autowired
+    public LoginController(UserService userService){
+        this.userService= userService ;
+    }
 
+    @PostMapping(value = "/login")
+    public ResponseEntity<String> login(@RequestBody LoginUser loginUser){
+        AuthorizationWithToken authorizationWithToken= new AuthorizationWithToken();
+        String token= authorizationWithToken.checkLogin(loginUser.getUserName(), loginUser.getPassword());
+        if(token.equals("")){
+            return new ResponseEntity<>("Username or password is wrong", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(token, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/register")
+    public ResponseEntity<String> register(@RequestBody User user){
+        AuthorizationWithToken authorizationWithToken= new AuthorizationWithToken();
+        String purePassword= user.getPassword();
+        user.setPassword(authorizationWithToken.generatedMD5(purePassword));
+        userService.add(user);
+        return new ResponseEntity(user, HttpStatus.CREATED);
+    }
 }

@@ -41,12 +41,12 @@ public class User implements Serializable {
 
     @OneToOne
     @JoinColumn(name = "role_id", nullable = false)
-    private Roles role;
+    private String role;
 
     public User() {
     }
 
-    public User(long userId, String userName, String password, String email, String phone, String address, Roles role) {
+    public User(long userId, String userName, String password, String email, String phone, String address, String role) {
         this.userId = userId;
         this.userName = userName;
         this.password= password;
@@ -104,11 +104,11 @@ public class User implements Serializable {
         this.address = address;
     }
 
-    public Roles getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Roles role) {
+    public void setRole(String role) {
         this.role = role;
     }
 

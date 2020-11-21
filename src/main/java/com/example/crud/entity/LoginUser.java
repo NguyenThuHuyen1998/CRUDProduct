@@ -20,7 +20,7 @@ public class LoginUser {
     @Size(min = 6, max = 50)
     private String password;
 
-    private boolean rememberMe;
+    //private boolean rememberMe;
 
     public String getUserName() {
         return userName;
@@ -38,20 +38,19 @@ public class LoginUser {
         this.password = password;
     }
 
-    public boolean isRememberMe() {
-        return rememberMe;
-    }
-
-    public void setRememberMe(boolean rememberMe) {
-        this.rememberMe = rememberMe;
-    }
+//    public boolean isRememberMe() {
+//        return rememberMe;
+//    }
+//
+//    public void setRememberMe(boolean rememberMe) {
+//        this.rememberMe = rememberMe;
+//    }
 
     @Override
     public String toString() {
         return "LoginUser{" +
                 "userName='" + userName + '\'' +
                 ", password='" + password + '\'' +
-                ", rememberMe=" + rememberMe +
                 '}';
     }
 }

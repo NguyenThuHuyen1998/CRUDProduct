@@ -1,8 +1,6 @@
 package com.example.crud.service;
 
 import com.example.crud.entity.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +12,7 @@ public interface UserService {
 
     List<User> findAllUser();
     Optional<User> findById(Long userId);
+    User findByName(String userName);
     boolean add (User user);
     boolean delete (long userId);
     boolean checkLogin(User user);
