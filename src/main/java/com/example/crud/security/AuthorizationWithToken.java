@@ -114,10 +114,10 @@ public class AuthorizationWithToken {
 
     public static void main(String[] args) throws ParseException {
         AuthorizationWithToken authorizationWithToken= new AuthorizationWithToken();
-//        authorizationWithToken.createJWT("huyenngtn", "admin");
-//        authorizationWithToken.decode("IfqwertyullllllIfqwertyullllll12345678901234567890eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIxMjM0NSIsImF1ZCI6Imh1eWVubmd0biIsInN1YiI6ImFkbWluIiwiaWF0IjoxNjA1ODg2MTU1LCJleHAiOjE2MDU4ODY3NTV9.u_15V-8tvMTqBrb_bmjqXJfJmyHlu_6uBUDmiX9dlWw");
-//        String password= generatedMD5("12345");
-//        System.out.println(password);
+        authorizationWithToken.createJWT("huyenngtn", "admin");
+        authorizationWithToken.decode("IfqwertyullllllIfqwertyullllll12345678901234567890eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIxMjM0NSIsImF1ZCI6Imh1eWVubmd0biIsInN1YiI6ImFkbWluIiwiaWF0IjoxNjA1ODg2MTU1LCJleHAiOjE2MDU4ODY3NTV9.u_15V-8tvMTqBrb_bmjqXJfJmyHlu_6uBUDmiX9dlWw");
+        String password= generatedMD5("12345");
+        System.out.println(password);
 
     }
 }
