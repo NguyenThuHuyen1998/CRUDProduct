@@ -1,6 +1,8 @@
 package com.example.crud.controller;
 
+import com.example.crud.entity.Category;
 import com.example.crud.entity.Product;
+import com.example.crud.service.CategoryService;
 import com.example.crud.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -16,10 +18,12 @@ import java.util.Optional;
 @RestController
 public class ProductController {
     private ProductService productService;
+    private CategoryService categoryService;
 
     @Autowired
-    public ProductController(ProductService productService){
+    public ProductController(ProductService productService, CategoryService categoryService){
         this.productService= productService;
+        this.categoryService= categoryService;
     }
 
     @GetMapping(value = "/products")
@@ -33,6 +37,12 @@ public class ProductController {
 
     @PostMapping(value = "/products")
     public ResponseEntity<Product> saveProduct(@RequestBody Product product, UriComponentsBuilder builder){
+        long categoryId= product.getCategory().getId();
+        Optional<Category> category= categoryService.findById(categoryId);
+        if(category==null){
+            return new ResponseEntity("CategoryId is not exists", HttpStatus.BAD_REQUEST);
+        }
+        product.setCategory(category.get());
         productService.save(product);
         HttpHeaders httpHeaders= new HttpHeaders();
         httpHeaders.setLocation(builder.path("/products/{id}").buildAndExpand(product.getId()).toUri());

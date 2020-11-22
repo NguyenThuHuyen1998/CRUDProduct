@@ -39,8 +39,7 @@ public class User implements Serializable {
     @Column(name = "address")
     private String address;
 
-    @OneToOne
-    @JoinColumn(name = "role_id", nullable = false)
+    @Column(name = "role", nullable = false)
     private String role;
 
     public User() {
