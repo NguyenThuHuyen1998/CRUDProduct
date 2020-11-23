@@ -26,6 +26,7 @@ public class ProductController {
         this.categoryService= categoryService;
     }
 
+    //lấy danh sách tất cả sản phẩm
     @GetMapping(value = "/products")
     public ResponseEntity<Product> findAllProduct(){
         List<Product> productList= productService.findAllProduct();
@@ -35,6 +36,7 @@ public class ProductController {
         return new ResponseEntity(productList, HttpStatus.OK);
     }
 
+    // tạo mới 1 sản phẩm
     @PostMapping(value = "/products")
     public ResponseEntity<Product> saveProduct(@RequestBody Product product, UriComponentsBuilder builder){
         long categoryId= product.getCategory().getId();
@@ -49,22 +51,27 @@ public class ProductController {
         return new ResponseEntity<>(product, HttpStatus.CREATED);
     }
 
+    // cập nhật tt 1 sp
     @PutMapping(value = "products/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable ("id") long productId, @RequestBody Product product){
         Optional<Product> currentProduct= productService.findById(productId);
+        if(currentProduct.isEmpty()){
+            return new ResponseEntity("Product is not exist", HttpStatus.NOT_FOUND);
+        }
         if(product== null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         else {
+            currentProduct.get().setCategory(product.getCategory());
             currentProduct.get().setName(product.getName());
             currentProduct.get().setPrice(product.getPrice());
             currentProduct.get().setDescription(product.getDescription());
             productService.save(currentProduct.get());
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity("Success", HttpStatus.OK);
         }
-
     }
 
+    // xem chi tiết 1 sản phẩm
     @GetMapping(value = "products/{id}")
     public ResponseEntity<Product> getAProduct(@PathVariable ("id") long productId){
         Optional<Product> currentProduct= productService.findById(productId);
@@ -75,24 +82,30 @@ public class ProductController {
 
     }
 
+    // xóa 1 sản phẩm
     @DeleteMapping(value = "products/{id}")
     public ResponseEntity<Product> deleteProduct(@PathVariable ("id") long productId){
         Optional<Product> product= productService.findById(productId);
-        if(product== null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(product.isEmpty()){
+            return new ResponseEntity("ProductId is not exist", HttpStatus.NOT_FOUND);
         }
         else {
             productService.remove(product.get());
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity("Success", HttpStatus.OK);
         }
 
     }
 
+    // lấy danh sách sản phẩm theo phân loại danh mục
     @GetMapping(value = "products/cate/{id}")
     public ResponseEntity<Product> findProductByCategory(@PathVariable ("id") long categoryId){
+        Optional<Category> category= categoryService.findById(categoryId);
+        if(category.isEmpty()){
+            return new ResponseEntity("CategoryId is not exist", HttpStatus.NOT_FOUND);
+        }
         List<Product> products= productService.findByCategoryID(categoryId);
-        if(products== null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(products.size()==0){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity(products, HttpStatus.OK);
 
