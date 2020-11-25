@@ -13,11 +13,20 @@ public class InputParam {
     public static final String TIME_END= "timeEnd";
     public static final String PRICE_MIN= "priceMin";
     public static final String PRICE_MAX= "priceMax";
+    public static final String KEY_WORD= "keyword";
     public static final String CATEGORY_ID= "categoryId";
     public static final String STATUS= "status";
+    public static final String SORT_BY= "sortBy";
+    public static final String SORT_PRICE= "sortPrice";
+    public static final String BEST_SELLER= "bestSeller";
     public static final String INCREASE= "increase";
     public static final String DECREASE= "decrease";
+    public static final String NEWEST= "newest";
+    public static final String NEWEST_LIMIT= "newest_limit";
     public static final String USER_NAME= "aud";
     public static final String ROLE= "sub";
+    public static final int LIMIT_DEFAULT= 10;
+    public static final String LIMIT= "limit";
+
 
 }

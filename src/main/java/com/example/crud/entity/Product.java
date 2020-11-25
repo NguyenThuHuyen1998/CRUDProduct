@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Optional;
 
 @Entity
@@ -30,15 +31,23 @@ public class Product implements Serializable {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "dateAdd")
+    private long dateAdd;
+
+    @Column(name = "image")
+    private String image;
+
     public Product() {
     }
 
-    public Product(long id, Category category, String name, double price, String description) {
+    public Product(long id, Category category, String name, double price, String description, long dateAdd, String image) {
         this.id = id;
         this.category = category;
         this.name = name;
         this.price = price;
         this.description = description;
+        this.dateAdd= dateAdd;
+        this.image= image;
     }
 
     public static long getSerialVersionUID() {
@@ -83,5 +92,21 @@ public class Product implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public long getDateAdd() {
+        return dateAdd;
+    }
+
+    public void setDateAdd(long dateAdd) {
+        this.dateAdd = dateAdd;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

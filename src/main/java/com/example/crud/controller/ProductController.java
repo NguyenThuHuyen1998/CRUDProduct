@@ -1,10 +1,12 @@
 package com.example.crud.controller;
 
+import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Category;
 import com.example.crud.entity.Product;
 import com.example.crud.service.CategoryService;
 import com.example.crud.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,8 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class ProductController {
@@ -28,12 +29,26 @@ public class ProductController {
 
     //lấy danh sách tất cả sản phẩm
     @GetMapping(value = "/products")
-    public ResponseEntity<Product> findAllProduct(){
-        List<Product> productList= productService.findAllProduct();
-        if(productList== null || productList.size()==0){
+    public ResponseEntity<Product> findAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
+                                                  @RequestParam(required = false, defaultValue = "0") double priceMin,
+                                                  @RequestParam(required = false, defaultValue= "0") double priceMax,
+                                                  @RequestParam(required = false, defaultValue = "0") long categoryId,
+                                                  @RequestParam(required = false, defaultValue = "") String sortBy,
+                                                  @RequestParam(required = false, defaultValue = "15") int limit)
+
+    {
+        Map<String, Object> input= new HashMap<>();
+        input.put(InputParam.KEY_WORD, keyword);
+        input.put(InputParam.PRICE_MAX, priceMax);
+        input.put(InputParam.PRICE_MIN, priceMin);
+        input.put(InputParam.CATEGORY_ID, categoryId);
+        input.put(InputParam.SORT_BY, sortBy);
+        input.put(InputParam.LIMIT, limit);
+        List<Product> output= productService.filterProduct(input);
+        if(output== null || output.size()==0){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity(productList, HttpStatus.OK);
+        return new ResponseEntity(output, HttpStatus.OK);
     }
 
     // tạo mới 1 sản phẩm
@@ -41,15 +56,17 @@ public class ProductController {
     public ResponseEntity<Product> saveProduct(@RequestBody Product product, UriComponentsBuilder builder){
         long categoryId= product.getCategory().getId();
         Optional<Category> category= categoryService.findById(categoryId);
-        if(category==null){
+        if(category.isEmpty()){
             return new ResponseEntity("CategoryId is not exists", HttpStatus.BAD_REQUEST);
         }
         product.setCategory(category.get());
+        product.setDateAdd(new Date().getTime());
         productService.save(product);
         HttpHeaders httpHeaders= new HttpHeaders();
         httpHeaders.setLocation(builder.path("/products/{id}").buildAndExpand(product.getId()).toUri());
         return new ResponseEntity<>(product, HttpStatus.CREATED);
     }
+
 
     // cập nhật tt 1 sp
     @PutMapping(value = "products/{id}")
@@ -109,5 +126,15 @@ public class ProductController {
         }
         return new ResponseEntity(products, HttpStatus.OK);
 
+    }
+
+    @GetMapping(value = "products/sort")
+    public ResponseEntity<Product> findProductByKeyword(@RequestParam(value = "sortBy",required = false, defaultValue = "") String sortBy,
+                                                        @RequestParam(value = "limit", required = false, defaultValue = "15") int limit){
+        List<Product> productList= productService.filterByDateAdd(limit, sortBy);
+        if(productList!= null && productList.size()>0){
+            return new ResponseEntity(productList, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
