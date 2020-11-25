@@ -1,6 +1,7 @@
 package com.example.crud.controller;
 
 import com.example.crud.entity.*;
+import com.example.crud.service.CartItemService;
 import com.example.crud.service.CartService;
 import com.example.crud.service.UserService;
 import org.slf4j.Logger;
@@ -27,10 +28,13 @@ public class CartController {
 
     private UserService userService;
 
+    private CartItemService cartItemService;
+
     @Autowired
-    public CartController(CartService cartService, UserService userService){
+    public CartController(CartService cartService, UserService userService, CartItemService cartItemService){
         this.cartService= cartService;
         this.userService= userService;
+        this.cartItemService= cartItemService;
     }
 
     //tạo 1 giỏ hàng sau khi tạo 1 user mới
@@ -40,7 +44,7 @@ public class CartController {
         if(user.isEmpty()){
             return new ResponseEntity("User is not exist", HttpStatus.BAD_REQUEST);
         }
-        long currentCartId= cartService.getCartId(userId);
+        long currentCartId= cartService.getCartIdByUserId(userId);
         if(currentCartId==0){
             Cart cart= new Cart(user.get(), null, 0);
             cartService.save(cart);
@@ -50,16 +54,16 @@ public class CartController {
     }
 
     @GetMapping(value = "/carts/products/{id}")
-    public ResponseEntity<Cart> getListProduct(@PathVariable("id") long userId){
-        Optional<User> user= userService.findById(userId);
-        if(user.isEmpty()){
+    public ResponseEntity<Cart> getListProduct(@PathVariable("id") long cartId){
+        Optional<Cart> cart= cartService.getCartById(cartId);
+        if(cart.isEmpty()){
             return new ResponseEntity("User is not exist", HttpStatus.BAD_REQUEST);
         }
-        long cartId= cartService.getCartId(userId);
         if(cartId!= 0){
             List<CartItem> cartItems= cartService.getlistCartItem(cartId);
             return new ResponseEntity(cartItems, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
 }
