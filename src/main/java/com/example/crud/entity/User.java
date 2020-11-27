@@ -42,6 +42,10 @@ public class User implements Serializable {
     @Column(name = "role", nullable = false)
     private String role;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "cartId")
+    private Cart cart;
+
     public User() {
     }
 
@@ -111,7 +115,15 @@ public class User implements Serializable {
         this.role = role;
     }
 
-//    public List<GrantedAuthority> getAuthorities() {
+    public Cart getCart() {
+        return cart;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
+    }
+
+    //    public List<GrantedAuthority> getAuthorities() {
 //        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
 //        for (String role : roles) {
 //            authorities.add(new SimpleGrantedAuthority(role));

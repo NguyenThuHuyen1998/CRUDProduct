@@ -1,7 +1,10 @@
 package com.example.crud.service.impl;
 
+import com.example.crud.entity.Cart;
 import com.example.crud.entity.User;
+import com.example.crud.repository.CartRepository;
 import com.example.crud.repository.UserRepository;
+import com.example.crud.service.CartService;
 import com.example.crud.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -20,10 +23,12 @@ public class UserServiceImpl implements UserService {
     public static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private UserRepository userRepository;
+    private CartRepository cartRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository){
+    public UserServiceImpl(UserRepository userRepository, CartRepository cartRepository){
         this.userRepository= userRepository;
+        this.cartRepository= cartRepository;
     }
 
     @Override
@@ -74,13 +79,14 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public boolean delete(long userId) {
-        Optional<User> user= userRepository.findById(userId);
+    public void delete(User user) {
         if(user!= null){
-            userRepository.delete(userId);
-            return true;
+            Cart cart= user.getCart();
+            if(cart!= null){
+                cartRepository.delete(cart);
+            }
+            userRepository.delete(user);
         }
-        return false;
     }
 
 

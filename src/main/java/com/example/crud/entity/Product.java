@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Entity
@@ -36,6 +37,9 @@ public class Product implements Serializable {
 
     @Column(name = "image")
     private String image;
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    private List<FeedBack> feedback;
 
     public Product() {
     }
@@ -108,5 +112,13 @@ public class Product implements Serializable {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public List<FeedBack> getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(List<FeedBack> feedback) {
+        this.feedback = feedback;
     }
 }

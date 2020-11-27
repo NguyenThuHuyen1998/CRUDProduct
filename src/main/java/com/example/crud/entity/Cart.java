@@ -19,7 +19,6 @@ public class Cart implements Serializable {
     @Column(name = "cart_id", nullable = false)
     private long cartId;
 
-
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -48,11 +47,11 @@ public class Cart implements Serializable {
         this.user = user;
     }
 
-    public List<CartItem> getCartLines() {
+    public List<CartItem> getCartItems() {
         return cartItems;
     }
 
-    public void setCartLines(List<CartItem> cartItems) {
+    public void setCartItems(List<CartItem> cartItems) {
         this.cartItems = cartItems;
     }
 

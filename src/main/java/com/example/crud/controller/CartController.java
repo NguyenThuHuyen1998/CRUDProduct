@@ -38,20 +38,20 @@ public class CartController {
     }
 
     //tạo 1 giỏ hàng sau khi tạo 1 user mới
-    @PostMapping(value = "/carts/{id}")
-    public ResponseEntity<Cart> createCart(@PathVariable("id") long userId){
-        Optional<User> user= userService.findById(userId);
-        if(user.isEmpty()){
-            return new ResponseEntity("User is not exist", HttpStatus.BAD_REQUEST);
-        }
-        long currentCartId= cartService.getCartIdByUserId(userId);
-        if(currentCartId==0){
-            Cart cart= new Cart(user.get(), null, 0);
-            cartService.save(cart);
-            return new ResponseEntity("Success", HttpStatus.OK);
-        }
-        return new ResponseEntity("Cart of this user is exist", HttpStatus.OK);
-    }
+//    @PostMapping(value = "/carts/{id}")
+//    public ResponseEntity<Cart> createCart(@PathVariable("id") long userId){
+//        Optional<User> user= userService.findById(userId);
+//        if(user.isEmpty()){
+//            return new ResponseEntity("User is not exist", HttpStatus.BAD_REQUEST);
+//        }
+//        long currentCartId= cartService.getCartIdByUserId(userId);
+//        if(currentCartId==0){
+//            Cart cart= new Cart(user.get(), null, 0);
+//            cartService.save(cart);
+//            return new ResponseEntity("Success", HttpStatus.OK);
+//        }
+//        return new ResponseEntity("Cart of this user is exist", HttpStatus.OK);
+//    }
 
     @GetMapping(value = "/carts/products/{id}")
     public ResponseEntity<Cart> getListProduct(@PathVariable("id") long cartId){
@@ -64,6 +64,12 @@ public class CartController {
             return new ResponseEntity(cartItems, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping(value = "/carts")
+    public ResponseEntity<Cart> getListCart(){
+        List<Cart> carts= cartService.getlistCart();
+        return new ResponseEntity(carts, HttpStatus.OK);
     }
 
 }

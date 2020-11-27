@@ -28,6 +28,7 @@ public class Order implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "order")
     private List<OrderLine> orderLine;
 
+
     @Column(name = "date_sell")
     private long dateSell;
 
