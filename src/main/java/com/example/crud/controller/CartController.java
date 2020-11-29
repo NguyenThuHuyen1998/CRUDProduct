@@ -12,10 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.List;
-import java.util.Optional;
 
 /*
     created by HuyenNgTn on 23/11/2020
@@ -37,39 +33,16 @@ public class CartController {
         this.cartItemService= cartItemService;
     }
 
-    //tạo 1 giỏ hàng sau khi tạo 1 user mới
-//    @PostMapping(value = "/carts/{id}")
-//    public ResponseEntity<Cart> createCart(@PathVariable("id") long userId){
-//        Optional<User> user= userService.findById(userId);
-//        if(user.isEmpty()){
-//            return new ResponseEntity("User is not exist", HttpStatus.BAD_REQUEST);
-//        }
-//        long currentCartId= cartService.getCartIdByUserId(userId);
-//        if(currentCartId==0){
-//            Cart cart= new Cart(user.get(), null, 0);
-//            cartService.save(cart);
-//            return new ResponseEntity("Success", HttpStatus.OK);
-//        }
-//        return new ResponseEntity("Cart of this user is exist", HttpStatus.OK);
-//    }
 
-    @GetMapping(value = "/carts/products/{id}")
-    public ResponseEntity<Cart> getListProduct(@PathVariable("id") long cartId){
-        Optional<Cart> cart= cartService.getCartById(cartId);
-        if(cart.isEmpty()){
-            return new ResponseEntity("User is not exist", HttpStatus.BAD_REQUEST);
-        }
-        if(cartId!= 0){
-            List<CartItem> cartItems= cartService.getlistCartItem(cartId);
-            return new ResponseEntity(cartItems, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
 
-    @GetMapping(value = "/carts")
-    public ResponseEntity<Cart> getListCart(){
-        List<Cart> carts= cartService.getlistCart();
-        return new ResponseEntity(carts, HttpStatus.OK);
+
+    @GetMapping(value = "/cart/{id}")
+    public ResponseEntity<Cart> getACart(@PathVariable("id") long userId){
+        Cart cart= cartService.getCartByUserId(userId);
+        if(cart== null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(cart, HttpStatus.OK);
     }
 
 }

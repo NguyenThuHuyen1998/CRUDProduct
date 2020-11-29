@@ -27,6 +27,9 @@ public class InputParam {
     public static final String ROLE= "sub";
     public static final int LIMIT_DEFAULT= 10;
     public static final String LIMIT= "limit";
+    public static final String ADMIN= "admin";
+    public static final String CUSTOMER= "customer";
+    public static final String QUANTITY= "quantity";
 
 
 }

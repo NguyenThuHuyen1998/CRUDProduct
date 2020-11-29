@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +40,7 @@ public class Product implements Serializable {
     private String image;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    private List<FeedBack> feedback;
+    private List<FeedBack> feedback= new ArrayList<>();
 
     public Product() {
     }

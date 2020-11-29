@@ -25,6 +25,7 @@ public class CategoryController {
     }
 
 //    produces={"application/json; charset=UTF-8"}
+    @CrossOrigin
     @RequestMapping(value = "/categories", method = RequestMethod.GET)
     public ResponseEntity<Category> getAll(){
         List<Category> categoryList= categoryService.findAllCategory();
@@ -44,8 +45,8 @@ public class CategoryController {
 
     @RequestMapping(value = "/categories/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Category> getCategory(@PathVariable long categoryId){
-        Optional<Category> category= categoryService.findById(categoryId);
-        if(category.isEmpty()){
+        Category category= categoryService.findById(categoryId);
+        if(category== null){
             return new ResponseEntity("Category not exists", HttpStatus.NO_CONTENT);
         }
 
@@ -54,22 +55,22 @@ public class CategoryController {
 
     @RequestMapping(value = "/categories/{id}", method = RequestMethod.PUT)
     public ResponseEntity<Category> updateCategory(@PathVariable("id") long categoryId, @RequestBody Category category){
-        Optional<Category> currentCategory= categoryService.findById(categoryId);
+        Category currentCategory= categoryService.findById(categoryId);
         if(category== null){
             return new ResponseEntity("Input null, please check input", HttpStatus.BAD_REQUEST);
         }
-        currentCategory.get().setDescription(category.getDescription());
-        currentCategory.get().setName(category.getName());
+        currentCategory.setDescription(category.getDescription());
+        currentCategory.setName(category.getName());
         return new ResponseEntity(currentCategory, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/categories/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<Category> deleteCategory(@PathVariable("id") long categoryId){
-        Optional<Category> currentCategory= categoryService.findById(categoryId);
-        if(currentCategory.isEmpty()){
+        Category currentCategory= categoryService.findById(categoryId);
+        if(currentCategory== null){
             return new ResponseEntity("Category not exists", HttpStatus.NO_CONTENT);
         }
-        categoryService.remove(currentCategory.get());
+        categoryService.remove(currentCategory);
         return new ResponseEntity(HttpStatus.OK);
     }
 }

@@ -23,8 +23,7 @@ public class Cart implements Serializable {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cart")
-    private List<CartItem> cartItems = new ArrayList<>();
+//    private List<CartItem> cartItems = new ArrayList<>();
 
     @Column(name = "order_num")
     private int orderNum;
@@ -33,9 +32,9 @@ public class Cart implements Serializable {
 
     }
 
-    public Cart(User user, List<CartItem> cartItems, int orderNum) {
+    public Cart(User user, int orderNum) {
         this.user = user;
-        this.cartItems = cartItems;
+//        this.cartItems = cartItems;
         this.orderNum = orderNum;
     }
 
@@ -47,13 +46,13 @@ public class Cart implements Serializable {
         this.user = user;
     }
 
-    public List<CartItem> getCartItems() {
-        return cartItems;
-    }
-
-    public void setCartItems(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
-    }
+//    public List<CartItem> getCartItems() {
+//        return cartItems;
+//    }
+//
+//    public void setCartItems(List<CartItem> cartItems) {
+//        this.cartItems = cartItems;
+//    }
 
     public int getOrderNum() {
         return orderNum;

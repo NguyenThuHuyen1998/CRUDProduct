@@ -15,12 +15,14 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static org.slf4j.LoggerFactory.*;
+
 /*
     created by HuyenNgTn on 15/11/2020
 */
 @Service
 public class UserServiceImpl implements UserService {
-    public static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    public static final Logger logger = getLogger(UserServiceImpl.class);
 
     private UserRepository userRepository;
     private CartRepository cartRepository;
@@ -37,8 +39,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findById(Long userId) {
-        return userRepository.findById(userId);
+    public User findById(Long userId) {
+        Optional<User> optionalUser=  userRepository.findById(userId);
+        return optionalUser.get();
     }
 
     @Override
@@ -81,10 +84,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(User user) {
         if(user!= null){
-            Cart cart= user.getCart();
-            if(cart!= null){
-                cartRepository.delete(cart);
-            }
             userRepository.delete(user);
         }
     }
@@ -100,5 +99,6 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
+
 
 }

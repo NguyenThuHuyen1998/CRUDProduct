@@ -28,6 +28,7 @@ public class ProductController {
     }
 
     //lấy danh sách tất cả sản phẩm
+    @CrossOrigin
     @GetMapping(value = "/products")
     public ResponseEntity<Product> findAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
                                                   @RequestParam(required = false, defaultValue = "0") double priceMin,
@@ -52,14 +53,15 @@ public class ProductController {
     }
 
     // tạo mới 1 sản phẩm
+    @CrossOrigin
     @PostMapping(value = "/products")
     public ResponseEntity<Product> saveProduct(@RequestBody Product product, UriComponentsBuilder builder){
         long categoryId= product.getCategory().getId();
-        Optional<Category> category= categoryService.findById(categoryId);
-        if(category.isEmpty()){
+        Category category= categoryService.findById(categoryId);
+        if(category== null){
             return new ResponseEntity("CategoryId is not exists", HttpStatus.BAD_REQUEST);
         }
-        product.setCategory(category.get());
+        product.setCategory(category);
         product.setDateAdd(new Date().getTime());
         productService.save(product);
         HttpHeaders httpHeaders= new HttpHeaders();
@@ -69,29 +71,31 @@ public class ProductController {
 
 
     // cập nhật tt 1 sp
+    @CrossOrigin
     @PutMapping(value = "products/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable ("id") long productId, @RequestBody Product product){
-        Optional<Product> currentProduct= productService.findById(productId);
-        if(currentProduct.isEmpty()){
+        Product currentProduct= productService.findById(productId);
+        if(currentProduct== null){
             return new ResponseEntity("Product is not exist", HttpStatus.NOT_FOUND);
         }
         if(product== null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         else {
-            currentProduct.get().setCategory(product.getCategory());
-            currentProduct.get().setName(product.getName());
-            currentProduct.get().setPrice(product.getPrice());
-            currentProduct.get().setDescription(product.getDescription());
-            productService.save(currentProduct.get());
+            currentProduct.setCategory(product.getCategory());
+            currentProduct.setName(product.getName());
+            currentProduct.setPrice(product.getPrice());
+            currentProduct.setDescription(product.getDescription());
+            productService.save(currentProduct);
             return new ResponseEntity("Success", HttpStatus.OK);
         }
     }
 
     // xem chi tiết 1 sản phẩm
+    @CrossOrigin
     @GetMapping(value = "products/{id}")
     public ResponseEntity<Product> getAProduct(@PathVariable ("id") long productId){
-        Optional<Product> currentProduct= productService.findById(productId);
+        Product currentProduct= productService.findById(productId);
         if(currentProduct== null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -100,24 +104,26 @@ public class ProductController {
     }
 
     // xóa 1 sản phẩm
+    @CrossOrigin
     @DeleteMapping(value = "products/{id}")
     public ResponseEntity<Product> deleteProduct(@PathVariable ("id") long productId){
-        Optional<Product> product= productService.findById(productId);
-        if(product.isEmpty()){
+        Product product= productService.findById(productId);
+        if(product== null){
             return new ResponseEntity("ProductId is not exist", HttpStatus.NOT_FOUND);
         }
         else {
-            productService.remove(product.get());
+            productService.remove(product);
             return new ResponseEntity("Success", HttpStatus.OK);
         }
 
     }
 
     // lấy danh sách sản phẩm theo phân loại danh mục
+    @CrossOrigin
     @GetMapping(value = "products/cate/{id}")
     public ResponseEntity<Product> findProductByCategory(@PathVariable ("id") long categoryId){
-        Optional<Category> category= categoryService.findById(categoryId);
-        if(category.isEmpty()){
+        Category category= categoryService.findById(categoryId);
+        if(category== null){
             return new ResponseEntity("CategoryId is not exist", HttpStatus.NOT_FOUND);
         }
         List<Product> products= productService.findByCategoryID(categoryId);
@@ -128,6 +134,7 @@ public class ProductController {
 
     }
 
+    @CrossOrigin
     @GetMapping(value = "products/sort")
     public ResponseEntity<Product> findProductByKeyword(@RequestParam(value = "sortBy",required = false, defaultValue = "") String sortBy,
                                                         @RequestParam(value = "limit", required = false, defaultValue = "15") int limit){

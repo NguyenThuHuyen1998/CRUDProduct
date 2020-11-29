@@ -38,8 +38,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Optional<Product> findById(Long productId) {
-        return productRepository.findById(productId);
+    public Product findById(Long productId) {
+        Optional<Product> optionalProduct= productRepository.findById(productId);
+        return optionalProduct.get();
     }
 //
     @Override
@@ -68,15 +69,19 @@ public class ProductServiceImpl implements ProductService {
         List<Product> productInput= findAllProduct();
         if(categoryId!= 0){
             productInput= filterByCategoryId(productInput, categoryId);
+            if(productInput== null) return null;
         }
         if(priceMax!= 0 && priceMin !=0 && priceMin< priceMax){
             productInput= filterByPrice(productInput, priceMin, priceMax);
+            if(productInput== null) return null;
         }
         if(!keyword.equals("")){
             productInput= filterByKeyword(keyword);
+            if(productInput== null) return null;
         }
         if(!sortBy.equals("")){
             productInput= filterByDateAdd(limit, sortBy);
+            if(productInput== null) return null;
         }
         return productInput;
     }

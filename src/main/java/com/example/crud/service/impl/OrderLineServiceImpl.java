@@ -33,8 +33,9 @@ public class OrderLineServiceImpl implements OrderLineService {
     }
 
     @Override
-    public Optional<OrderLine> findById(Long orderId) {
-        return orderLineRepository.findById(orderId);
+    public OrderLine findById(Long orderId) {
+        Optional<OrderLine> optionalOrderLine= orderLineRepository.findById(orderId);
+        return optionalOrderLine.get();
     }
 
     @Override

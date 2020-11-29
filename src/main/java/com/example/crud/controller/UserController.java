@@ -1,11 +1,10 @@
 package com.example.crud.controller;
 
+import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Cart;
 import com.example.crud.entity.User;
 import com.example.crud.service.CartService;
 import com.example.crud.service.UserService;
-//import com.example.crud.service.impl.JWTServiceImpl;
-import com.example.crud.service.impl.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,8 +46,9 @@ public class UserController {
 
     @PostMapping(value = "/users")
     public ResponseEntity<User> registerUser(@RequestBody User user){
+        user.setEnable(true);
         userService.add(user);
-        cartService.save(new Cart(user, null, 0));
+        cartService.save(new Cart(user, 0));
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
@@ -65,7 +64,7 @@ public class UserController {
 
         @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
         public ResponseEntity<Object> getUserById(@PathVariable("id") long id) {
-            Optional<User> user = userService.findById(id);
+            User user = userService.findById(id);
             if (user != null) {
                 return new ResponseEntity<Object>(user, HttpStatus.OK);
             }
@@ -80,17 +79,37 @@ public class UserController {
 //                return new ResponseEntity<String>("User Existed!", HttpStatus.BAD_REQUEST);
 //            }
 //        }
-        /* ---------------- DELETE USER ------------------------ */
+        /* ---------------- không xóa user, chỉ vô hiệu hóa ------------------------ */
         @RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
-        public ResponseEntity<String> deleteUserById(@PathVariable("id") long id) {
-            Optional<User> user= userService.findById(id);
-            if(!user.isEmpty()){
-                userService.delete(user.get());
-                return new ResponseEntity<String>("Deleted!", HttpStatus.OK);
+        public ResponseEntity<String> disableUser(@PathVariable("id") long id) {
+            User user= userService.findById(id);
+            if(user!= null){
+                user.setEnable(false);
+                userService.add(user);
+                return new ResponseEntity<String>("Disable!", HttpStatus.OK);
             }
             return new ResponseEntity<>("User not exist", HttpStatus.BAD_REQUEST);
 
         }
+
+        // phân quyền user làm admin
+    @PostMapping(value = "user/admin/{id}")
+    public ResponseEntity<User> decentralizationAdmin(@PathVariable ("id") long id,
+                                                      @RequestParam ("user-id") long userId){
+            User user= userService.findById(id);
+            User currentAdmin= userService.findById(id);
+            if(user== null ) {
+                return new ResponseEntity("User yet has not been register", HttpStatus.BAD_REQUEST);
+            }
+            else if(currentAdmin== null|| !currentAdmin.isEnable() || !currentAdmin.getRole().equals(InputParam.ADMIN)){
+                return new ResponseEntity("You have not permission", HttpStatus.BAD_REQUEST);
+            }
+            else {
+                user.setRole(InputParam.ADMIN);
+                userService.add(user);
+                return new ResponseEntity("Decentralization success", HttpStatus.OK);
+            }
+    }
 //        @RequestMapping(value = "/login", method = RequestMethod.POST)
 //        public ResponseEntity<String> login(HttpServletRequest request, @RequestBody User user) {
 //            String result = "";
@@ -109,5 +128,10 @@ public class UserController {
 //            }
 //            return new ResponseEntity<String>(result, httpStatus);
 //        }
+
+        public boolean checkEnableUser(long userId){
+            User user= userService.findById(userId);
+            return user.isEnable();
+        }
     }
 
