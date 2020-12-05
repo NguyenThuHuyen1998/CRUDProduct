@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 /*
     created by HuyenNgTn on 15/11/2020
@@ -26,7 +27,7 @@ public class Order implements Serializable {
     private User user;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "order")
-    private List<OrderLine> orderLine;
+    private Set<OrderLine> orderLine;
 
 
     @Column(name = "date_sell")
@@ -41,10 +42,8 @@ public class Order implements Serializable {
     public Order() {
     }
 
-    public Order(long orderId, User user, double totalPrice, String status, long dateSell) {
-        this.orderId = orderId;
+    public Order(User user, double totalPrice, String status, long dateSell) {
         this.user = user;
-//        this.orderLine = orderLine;
         this.dateSell= dateSell;
         this.totalPrice = totalPrice;
         this.status = status;
@@ -65,12 +64,12 @@ public class Order implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
-
-    public List<OrderLine> getOrderLine() {
+//
+    public Set<OrderLine> getOrderLine() {
         return orderLine;
     }
 
-    public void setOrderLine(List<OrderLine> orderLine) {
+    public void setOrderLine(Set<OrderLine> orderLine) {
         this.orderLine = orderLine;
     }
 //

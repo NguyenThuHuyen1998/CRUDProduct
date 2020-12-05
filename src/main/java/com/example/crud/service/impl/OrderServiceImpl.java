@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /*
     created by HuyenNgTn on 15/11/2020
@@ -34,9 +35,15 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public Order findById(Long orderId) {
-//        return orderRepository.findById(orderId);
-        return null;
+    public Optional<Order> findById(Long orderId) {
+        //Optional<Order> optionalOrder= orderRepository.findById(orderId);
+//        return optionalOrder.get();
+        return orderRepository.findById(orderId);
+    }
+
+    @Override
+    public List<Order> getListOrderByUserId(long userId) {
+        return orderRepository.getListOrderByUserId(userId);
     }
 
 
@@ -65,29 +72,11 @@ public class OrderServiceImpl implements OrderService {
 //        return orderRepository.getListOrderLineInOrder(orderId);
 //    }
 
-    public List<Order> filterOrder(Map<String, Object> filter){
-        long timeStart= (long) filter.get(InputParam.TIME_START);
-        long timeEnd= (long) filter.get(InputParam.TIME_END);
-        String orderStatus= (String) filter.get(InputParam.STATUS);
+    public List<Order> getListOrderByStatus(String status){
         List<Order> orderInput= (List<Order>) orderRepository.findAll();
-        List<Order> orderFilter= new ArrayList<>();
-        if(timeStart!= 0 && timeEnd!= 0 && timeStart< timeEnd) {
-            for(Order order: orderInput) {
-                if(order.getDateSell()>= timeStart && order.getDateSell()<= timeEnd){
-                    orderFilter.add(order);
-                }
-            }
-            orderInput= orderFilter;
+        if(status!= ""){
+            orderRepository.getListByStatus(status);
         }
-        if(orderStatus!= ""){
-            for(Order order: orderFilter){
-                if(order.getStatus().equals(orderStatus)){
-                    orderFilter.add(order);
-                }
-            }
-            orderInput= orderFilter;
-        }
-
         return orderInput;
     }
 

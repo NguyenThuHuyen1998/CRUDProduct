@@ -1,9 +1,12 @@
 package com.example.crud.entity;
 
+import com.example.crud.service.FeedbackService;
+import com.example.crud.service.impl.FeedbackServiceImpl;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,24 +36,32 @@ public class Product implements Serializable {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "preview")
+    private String preview;
+
     @Column(name = "dateAdd")
     private long dateAdd;
 
     @Column(name = "image")
     private String image;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    private List<FeedBack> feedback= new ArrayList<>();
+    @ManyToMany
+    @JoinTable(name = "product_cart__",
+            joinColumns = @JoinColumn(name = "product_id"),  // TRong đó, khóa ngoại chính là address_id trỏ tới class hiện tại (Address)
+            inverseJoinColumns = @JoinColumn(name = "cart_id") //Khóa ngoại thứ 2 trỏ tới thuộc tính ở dưới (Person)
+    )
 
+    private List<Cart> cartList;
     public Product() {
     }
 
-    public Product(long id, Category category, String name, double price, String description, long dateAdd, String image) {
+    public Product(long id, Category category, String name, double price, String description, String preview, long dateAdd, String image) {
         this.id = id;
         this.category = category;
         this.name = name;
         this.price = price;
         this.description = description;
+        this.preview= preview;
         this.dateAdd= dateAdd;
         this.image= image;
     }
@@ -99,8 +110,18 @@ public class Product implements Serializable {
         this.description = description;
     }
 
-    public long getDateAdd() {
-        return dateAdd;
+    public String getPreview() {
+        return preview;
+    }
+
+    public void setPreview(String preview) {
+        this.preview = preview;
+    }
+
+    public String getDateAdd() {
+        long dateLong= dateAdd;
+        Timestamp ts =new Timestamp(dateAdd);
+        return ts.toString();
     }
 
     public void setDateAdd(long dateAdd) {
@@ -115,11 +136,12 @@ public class Product implements Serializable {
         this.image = image;
     }
 
-    public List<FeedBack> getFeedback() {
-        return feedback;
-    }
+//    public List<FeedBack> getFeedback() {
+//        return feedback;
+//    }
+//
+//    public void setFeedback(List<FeedBack> feedback) {
+//        this.feedback = feedback;
+//    }
 
-    public void setFeedback(List<FeedBack> feedback) {
-        this.feedback = feedback;
-    }
 }

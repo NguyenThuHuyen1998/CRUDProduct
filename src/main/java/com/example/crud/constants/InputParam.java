@@ -26,10 +26,18 @@ public class InputParam {
     public static final String USER_NAME= "aud";
     public static final String ROLE= "sub";
     public static final int LIMIT_DEFAULT= 10;
+    public static final String PAGE= "page";
     public static final String LIMIT= "limit";
     public static final String ADMIN= "admin";
     public static final String CUSTOMER= "customer";
     public static final String QUANTITY= "quantity";
-
+    public static final String DATA= "data";
+    public static final String PAGING= "paging";
+    public static final String TOTAL_COUNT= "total_count";
+    public static final String RECORD_IN_PAGE= "record_in_page";
+    public static final String TOTAL_PAGE= "total_page";
+    public static final String CURRENT_PAGE= "current_page";
+    public static final String PROCESSING= "processing";
+    public static final String FINISHED= "finished";
 
 }

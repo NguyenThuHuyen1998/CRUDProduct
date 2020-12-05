@@ -10,6 +10,7 @@ public interface ProductService {
     List<Product> findAllProduct();
     Product findById(Long productId);
     List<Product> findByCategoryID(Long categoryId);
+//    List<Product> findProductByPrice(double priceMin, double priceMax);
     List<Product> filterProduct(Map<String, Object> input);
     void save (Product product);
     void remove (Product product);

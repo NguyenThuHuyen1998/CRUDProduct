@@ -48,6 +48,11 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductByCategoryId(categoryId);
     }
 
+//    @Override
+//    public List<Product> findProductByPrice(double priceMin, double priceMax) {
+//        return productRepository.findProductByPrice(priceMin, priceMax);
+//    }
+
     @Override
     public void save(Product product) {
         productRepository.save(product);

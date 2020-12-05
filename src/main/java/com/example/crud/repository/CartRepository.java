@@ -1,9 +1,6 @@
 package com.example.crud.repository;
 
 import com.example.crud.entity.Cart;
-import com.example.crud.entity.CartItem;
-import com.example.crud.entity.Category;
-import com.example.crud.entity.OrderLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.Query;

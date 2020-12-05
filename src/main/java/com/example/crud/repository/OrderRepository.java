@@ -22,7 +22,8 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Long>
     @Query("select t from Order t left join fetch t.user tcc where tcc.userId = :userId")
     List<Order> getListOrderByUserId(@Param("userId") long userId);
 
-
+    @Query("select t from Order t where t.status= : status")
+    List<Order> getListByStatus(@Param("status") String status);
 
 //    @Query("select t from Order t left join fetch t.orderLine tcc where tcc.productId=: productId")
 //    List<Order> getListOrderByProductId(@Param("productId") long productId);

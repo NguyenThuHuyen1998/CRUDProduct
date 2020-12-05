@@ -44,6 +44,17 @@ public class OrderLine implements Serializable {
         this.amount = amount;
     }
 
+    public OrderLine(Product product, Order order, int amount) {
+        this.order= order;
+        this.product= product;
+        this.amount = amount;
+    }
+
+    public OrderLine(CartItem cartItem, Order order) {
+        this.product= cartItem.getProduct();
+        this.order= order;
+        this.amount = cartItem.getQuantity();
+    }
     public long getOrderLineId() {
         return orderLineId;
     }

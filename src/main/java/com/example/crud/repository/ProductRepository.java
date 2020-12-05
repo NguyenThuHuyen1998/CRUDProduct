@@ -12,4 +12,7 @@ import java.util.List;
 public interface ProductRepository extends PagingAndSortingRepository<Product, Long> {
     @Query("select t from Product t left join fetch t.category tcc where tcc.id = :id")
     List<Product> findProductByCategoryId(@Param("id") long cateId);
+
+//    @Query("select t from Product t where t.price <=: priceMax and t.price>=: priceMin and t.name like '%:keyword+%' ")
+//    List<Product> findProductByPriceKeyword(@Param("priceMax") double priceMax, @Param("priceMin") double priceMin, @Param("keyword") String keyword);
 }

@@ -16,7 +16,7 @@ public interface CartItemService {
      CartItem getCartLineById(long cartLineId) ;
      CartItem getCartItemByProductId (long userId, long productId);
      void updateQuantityCartItem(CartItem cartItem);
-     void deleteCartItem(long userId, long productId);
+     void deleteCartItem(CartItem cartItem);
      void deleteAllCartItem(long userId);
      List<CartItem> getListCartItemInCart(long userId);
 }

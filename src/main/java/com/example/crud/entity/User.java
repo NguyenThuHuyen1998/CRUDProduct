@@ -28,13 +28,13 @@ public class User implements Serializable {
     private String userName;
 
     @Column(name = "pass_word")
-    private String password;
+    protected String password;
 
     @Column(name = "email")
     private String email;
 
     @Column(name = "phone")
-    private String phone;
+    protected String phone;
 
     @Column(name = "address")
     private String address;

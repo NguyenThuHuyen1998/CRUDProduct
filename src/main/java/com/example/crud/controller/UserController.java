@@ -48,7 +48,7 @@ public class UserController {
     public ResponseEntity<User> registerUser(@RequestBody User user){
         user.setEnable(true);
         userService.add(user);
-        cartService.save(new Cart(user, 0));
+        cartService.save(new Cart(user));
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 

@@ -13,7 +13,6 @@ import java.util.List;
 public class Cart implements Serializable {
     private static final long serialVersionUID = 1L;
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "cart_id", nullable = false)
@@ -24,18 +23,19 @@ public class Cart implements Serializable {
     private User user;
 
 //    private List<CartItem> cartItems = new ArrayList<>();
+    @ManyToMany(mappedBy = "tblCART")
+    private List<Product> productList;
 
-    @Column(name = "order_num")
-    private int orderNum;
+    @Column(name = "total_money")
+    private double totalMoney;
 
     public Cart(){
 
     }
 
-    public Cart(User user, int orderNum) {
+    public Cart(User user) {
         this.user = user;
 //        this.cartItems = cartItems;
-        this.orderNum = orderNum;
     }
 
     public User getUser() {
@@ -54,13 +54,19 @@ public class Cart implements Serializable {
 //        this.cartItems = cartItems;
 //    }
 
-    public int getOrderNum() {
-        return orderNum;
+    public long getCartId() {
+        return cartId;
     }
 
-    public void setOrderNum(int orderNum) {
-        this.orderNum = orderNum;
+    public void setCartId(long cartId) {
+        this.cartId = cartId;
     }
 
+    public double getTotalMoney() {
+        return totalMoney;
+    }
 
+    public void setTotalMoney(double totalMoney) {
+        this.totalMoney = totalMoney;
+    }
 }

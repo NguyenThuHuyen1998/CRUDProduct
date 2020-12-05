@@ -2,8 +2,10 @@ package com.example.crud.controller;
 
 import com.example.crud.entity.Order;
 import com.example.crud.entity.OrderLine;
+import com.example.crud.form.OrderLineForm;
 import com.example.crud.service.OrderLineService;
 import com.example.crud.service.OrderService;
+import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,10 +43,10 @@ public class OrderLineController {
     @PostMapping(value = "/orderLines")
     public ResponseEntity<OrderLine> createOrder(@RequestBody OrderLine orderLine){
         long orderId= orderLine.getOrder().getOrderId();
-        Order order= orderService.findById(orderId);
-        if(order!= null){
+        Optional<Order> order= orderService.findById(orderId);
+        if(!order.isEmpty()){
             orderLineService.save(orderLine);
-            order.getOrderLine().add(orderLine);
+            //order.getOrderLine().add(orderLine);
             return new ResponseEntity(orderLine, HttpStatus.CREATED);
         }
         return new ResponseEntity("Validator invalid", HttpStatus.BAD_REQUEST);
@@ -53,9 +55,12 @@ public class OrderLineController {
     @GetMapping(value = "orderLines/{order-id}")
     public ResponseEntity<OrderLine> getListOrderLine(@PathVariable("order-id") Long orderId){
         List<OrderLine> orderLines= orderLineService.getListOrderLineInOrder(orderId);
+        List<OrderLineForm> orderLineForms;
         if(orderLines!= null && orderLines.size()>0){
-            return new ResponseEntity(orderLines, HttpStatus.OK);
+            orderLineForms= orderLineService.getListOrderLineForm(orderLines);
+            return new ResponseEntity(orderLineForms, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }
