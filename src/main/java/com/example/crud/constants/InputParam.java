@@ -38,6 +38,7 @@ public class InputParam {
     public static final String TOTAL_PAGE= "total_page";
     public static final String CURRENT_PAGE= "current_page";
     public static final String PROCESSING= "processing";
+    public static final String SHIPPING= "shipping";
     public static final String FINISHED= "finished";
 
 }

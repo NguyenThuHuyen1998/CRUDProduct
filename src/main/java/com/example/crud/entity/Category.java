@@ -1,9 +1,13 @@
 package com.example.crud.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.io.Serializable;
 @Entity
 @Table(name = "tblCATEGORIES")
+
 public class Category implements Serializable {
 
     @Id

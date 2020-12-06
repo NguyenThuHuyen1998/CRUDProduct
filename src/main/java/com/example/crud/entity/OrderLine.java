@@ -1,5 +1,6 @@
 package com.example.crud.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ public class OrderLine implements Serializable {
 
     @OneToOne
     @JoinColumn(name = "product_id", nullable = false)
+    @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)

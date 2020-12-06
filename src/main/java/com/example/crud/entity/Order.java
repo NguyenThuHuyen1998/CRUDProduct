@@ -27,7 +27,7 @@ public class Order implements Serializable {
     private User user;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "order")
-    private Set<OrderLine> orderLine;
+    private List<OrderLine> orderLines;
 
 
     @Column(name = "date_sell")
@@ -65,12 +65,12 @@ public class Order implements Serializable {
         this.user = user;
     }
 //
-    public Set<OrderLine> getOrderLine() {
-        return orderLine;
+    public List<OrderLine> getOrderLines() {
+        return orderLines;
     }
 
-    public void setOrderLine(Set<OrderLine> orderLine) {
-        this.orderLine = orderLine;
+    public void setOrderLines(List<OrderLine> orderLines) {
+        this.orderLines = orderLines;
     }
 //
 //    public void addOrderLine(OrderLine orderLine){

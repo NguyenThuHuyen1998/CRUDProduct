@@ -7,12 +7,11 @@ import com.example.crud.service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /*
     created by HuyenNgTn on 15/11/2020
@@ -35,10 +34,8 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public Optional<Order> findById(Long orderId) {
-        //Optional<Order> optionalOrder= orderRepository.findById(orderId);
-//        return optionalOrder.get();
-        return orderRepository.findById(orderId);
+    public Order findById(Long orderId) {
+        return orderRepository.findById(orderId).get();
     }
 
     @Override
@@ -46,16 +43,17 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.getListOrderByUserId(userId);
     }
 
-
-//    @Override
-//    public List<Order> findByOrderStatus(OrderStatus status) {
-//        return
-//    }
-
-//    @Override
-//    public List<Order> findByProductId(long productId) {
-//        return orderRepository.getListOrderByProductId(productId);
-//    }
+    @Override
+    public List<Order> getListOrderByStatus(String status) {
+        try{
+            Sort sort= Sort.by("dateSell").descending();
+            List<Order> list= orderRepository.getListByStatus(status, sort);
+            return list;
+        }
+        catch (Exception e){
+            return null;
+        }
+    }
 
     @Override
     public void save(Order order) {
@@ -67,17 +65,21 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.delete(order);
     }
 
+    @Override
+    public List<Order> filterOrder(Map<String, Object> filter) {
+        String status= (String) filter.get(InputParam.STATUS);
+        int limit= (int) filter.get(InputParam.LIMIT);
+        List<Order> orderList= findAllOrder();
+        if(status!= null){
+
+        }
+        return null;
+    }
+
 //    @Override
 //    public List<OrderLine> getListOrderLine(Long orderId) {
 //        return orderRepository.getListOrderLineInOrder(orderId);
 //    }
 
-    public List<Order> getListOrderByStatus(String status){
-        List<Order> orderInput= (List<Order>) orderRepository.findAll();
-        if(status!= ""){
-            orderRepository.getListByStatus(status);
-        }
-        return orderInput;
-    }
 
 }

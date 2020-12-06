@@ -1,5 +1,7 @@
 package com.example.crud.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,11 +22,11 @@ public class Cart implements Serializable {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
     private User user;
 
-//    private List<CartItem> cartItems = new ArrayList<>();
-    @ManyToMany(mappedBy = "tblCART")
-    private List<Product> productList;
+//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cart")
+//    private List<CartItem> cartItems;
 
     @Column(name = "total_money")
     private double totalMoney;
@@ -46,14 +48,6 @@ public class Cart implements Serializable {
         this.user = user;
     }
 
-//    public List<CartItem> getCartItems() {
-//        return cartItems;
-//    }
-//
-//    public void setCartItems(List<CartItem> cartItems) {
-//        this.cartItems = cartItems;
-//    }
-
     public long getCartId() {
         return cartId;
     }
@@ -70,3 +64,4 @@ public class Cart implements Serializable {
         this.totalMoney = totalMoney;
     }
 }
+

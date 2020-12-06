@@ -7,9 +7,9 @@ import com.example.crud.service.CategoryService;
 import com.example.crud.service.ProductService;
 import com.example.crud.service.impl.ObjectImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
-import org.json.simple.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,12 +19,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.*;
 
 @RestController
 public class ProductController {
+    public static final Logger logger = LoggerFactory.getLogger(ProductController.class);
     private ProductService productService;
     private CategoryService categoryService;
 
@@ -57,29 +56,9 @@ public class ProductController {
         output= productService.filterProduct(input);
         List<Product> totalProduct= productService.findAllProduct();
         if (output == null || output.size() == 0) {
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         JSONObject jsonObject= new JSONObject();
         Map<String, Object> map= new HashMap<>();
-//        JSONArray jsonArray= new JSONArray();
-//        for(int i=0; i<output.size(); i++){
-//            jsonArray.put(output.get(i));
-//        }
-//        jsonObject.put(InputParam.DATA, jsonArray);
-
-//        ObjectMapper mapper = new ObjectMapper();
-//        jsonObject.put(InputParam.DATA, new JSONArray(mapper.writeValueAsString(output)));
-//        for(int i=0; i<totalProduct.size(); i++){
-//            map.put("value"+i+1, totalProduct.get(i));
-//        }
-//        JSONArray jsonArray = new JSONArray();
-//        for(Product product: totalProduct){
-//            jsonArray.add(convertProductToJSONObject(product));
-//        }
-//        org.json.JSONArray jsonArray= new org.json.JSONArray();
-//        jsonArray.putAll(output);
-//        jsonObject.put("data", output);
-//        System.out.println(jsonObject);
         ObjectImpl object= new ObjectImpl();
         int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
         jsonObject.put(InputParam.PAGING, object.getPagingJSONObject(totalProduct.size(), limit, totalPage, page));
@@ -107,15 +86,21 @@ public class ProductController {
     @PostMapping(value = "/products")
     public ResponseEntity<Product> saveProduct(@RequestBody Product product, UriComponentsBuilder builder) {
         long categoryId = product.getCategory().getId();
-        Category category = categoryService.findById(categoryId);
-        if (category == null) {
-            return new ResponseEntity("CategoryId is not exists", HttpStatus.BAD_REQUEST);
+        try{
+            Category category = categoryService.findById(categoryId);
+            if (category == null) {
+                return new ResponseEntity("CategoryId is not exists", HttpStatus.BAD_REQUEST);
+            }
+            product.setCategory(category);
+            product.setDateAdd(new Date().getTime());
+            productService.save(product);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setLocation(builder.path("/products/{id}").buildAndExpand(product.getId()).toUri());
         }
-        product.setCategory(category);
-        product.setDateAdd(new Date().getTime());
-        productService.save(product);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setLocation(builder.path("/products/{id}").buildAndExpand(product.getId()).toUri());
+        catch (Exception e){
+            logger.error(String.valueOf(e));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
         return new ResponseEntity<>(product, HttpStatus.CREATED);
     }
 
@@ -144,11 +129,18 @@ public class ProductController {
     @CrossOrigin
     @GetMapping(value = "products/{id}")
     public ResponseEntity<Product> getAProduct(@PathVariable("id") long productId) {
-        Product currentProduct = productService.findById(productId);
-        if (currentProduct == null) {
+        try{
+            Product currentProduct = productService.findById(productId);
+            if (currentProduct != null) {
+                return new ResponseEntity(currentProduct, HttpStatus.OK);
+            }
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity(currentProduct, HttpStatus.OK);
+        catch (Exception e){
+            logger.error(String.valueOf(e));
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
     }
 
     // xóa 1 sản phẩm

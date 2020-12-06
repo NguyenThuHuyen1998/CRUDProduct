@@ -69,12 +69,19 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public void deleteAllCartItem(long userId){
-        List<CartItem> cartItemList= cartItemRepository.getListCartItemInCart(userId);
-        Cart cart= cartRepository.getCartByUserId(userId);
-        for(CartItem cartItem: cartItemList){
-            cartItemList.remove(cartItem);
-            cartRepository.save(cart);
-            cartItemRepository.delete(cartItem);
+        try{
+            List<CartItem> cartItemList= cartItemRepository.getListCartItemInCart(userId);
+            Cart cart= cartRepository.getCartByUserId(userId);
+            if(cartItemList.size()>0){
+                for(CartItem cartItem: cartItemList){
+                    cartItemList.remove(cartItem);
+                    cartRepository.save(cart);
+                    cartItemRepository.delete(cartItem);
+                }
+            }
+        }
+        catch (Exception e){
+            logger.error(String.valueOf(e));
         }
     }
 
@@ -82,4 +89,11 @@ public class CartItemServiceImpl implements CartItemService {
     public List<CartItem> getListCartItemInCart(long userId) {
         return cartItemRepository.getListCartItemInCart(userId);
     }
+
+    @Override
+    public CartItem getCartItem(long cartItemId) {
+        return cartItemRepository.findById(cartItemId).get();
+    }
+
+
 }

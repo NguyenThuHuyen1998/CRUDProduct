@@ -2,6 +2,7 @@ package com.example.crud.entity;
 
 import com.example.crud.service.FeedbackService;
 import com.example.crud.service.impl.FeedbackServiceImpl;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
@@ -45,13 +46,12 @@ public class Product implements Serializable {
     @Column(name = "image")
     private String image;
 
-    @ManyToMany
-    @JoinTable(name = "product_cart__",
-            joinColumns = @JoinColumn(name = "product_id"),  // TRong đó, khóa ngoại chính là address_id trỏ tới class hiện tại (Address)
-            inverseJoinColumns = @JoinColumn(name = "cart_id") //Khóa ngoại thứ 2 trỏ tới thuộc tính ở dưới (Person)
-    )
+//    @ManyToMany
+//    @JoinTable(name = "product_cart__",
+//            joinColumns = @JoinColumn(name = "product_id"),  // TRong đó, khóa ngoại chính là address_id trỏ tới class hiện tại (Address)
+//            inverseJoinColumns = @JoinColumn(name = "cart_id") //Khóa ngoại thứ 2 trỏ tới thuộc tính ở dưới (Person)
+//    )
 
-    private List<Cart> cartList;
     public Product() {
     }
 
@@ -102,6 +102,7 @@ public class Product implements Serializable {
         this.price = price;
     }
 
+    @JsonIgnore
     public String getDescription() {
         return description;
     }

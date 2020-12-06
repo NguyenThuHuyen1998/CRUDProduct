@@ -12,12 +12,10 @@ import java.util.Optional;
 */
 public interface OrderService {
     List<Order> findAllOrder();
-//    Order findById(Long orderId);
-    Optional<Order> findById(Long orderId);
+    Order findById(Long orderId);
     List<Order> getListOrderByUserId(long userId);
     List<Order> getListOrderByStatus(String status);
-//    List<Order> findByProductId(long productId);
     void save (Order order);
     void remove (Order order);
-//    List<OrderLine> getListOrderLine(Long orderId);
+    List<Order> filterOrder(Map<String, Object> filter);
 }

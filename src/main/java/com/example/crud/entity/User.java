@@ -2,6 +2,7 @@ package com.example.crud.entity;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -79,6 +80,7 @@ public class User implements Serializable {
         this.userName = userName;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
@@ -103,6 +105,7 @@ public class User implements Serializable {
         this.phone = phone;
     }
 
+    @JsonIgnore
     public String getAddress() {
         return address;
     }

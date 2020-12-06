@@ -43,8 +43,8 @@ public class OrderLineController {
     @PostMapping(value = "/orderLines")
     public ResponseEntity<OrderLine> createOrder(@RequestBody OrderLine orderLine){
         long orderId= orderLine.getOrder().getOrderId();
-        Optional<Order> order= orderService.findById(orderId);
-        if(!order.isEmpty()){
+        Order order= orderService.findById(orderId);
+        if(order!= null){
             orderLineService.save(orderLine);
             //order.getOrderLine().add(orderLine);
             return new ResponseEntity(orderLine, HttpStatus.CREATED);

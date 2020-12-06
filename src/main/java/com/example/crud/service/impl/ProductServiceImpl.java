@@ -140,7 +140,7 @@ public class ProductServiceImpl implements ProductService {
         else if(sortBy.equals(InputParam.NEWEST)){
             sort= Sort.by("dateAdd").descending();
         }
-        Pageable pageable = PageRequest.of(1, limit, sort);
+//        Pageable pageable = PageRequest.of(1, limit, sort);
         List<Product> productList= (List<Product>) productRepository.findAll(sort);
         return productList;
     }
