@@ -41,27 +41,34 @@ public class CartItemController {
     public ResponseEntity<CartItem> addProduct(@PathVariable(name = "product-id") long productId,
                                                @RequestParam(name = "user-id") long userId){
         // tạm thời truyền userId vào, sau lấy userId qua token nên chắc chắn user có tồn tại, không cần check
-        User user= userService.findById(userId);
-        Cart cart= cartService.getCartByUserId(userId);
-        List<CartItem> cartItemList= cartItemService.getListCartItemInCart(userId);
-        Product product= productService.findById(productId);
-        CartItem cartItemTarget= null;
-        if(cartItemList.size()>0){
-            for(CartItem index: cartItemList) {
-                if (product.getId() == index.getProduct().getId()) {
-                    cartItemTarget= index;
+        try{
+            User user= userService.findById(userId);
+            Cart cart= cartService.getCartByUserId(userId);
+            List<CartItem> cartItemList= cartItemService.getListCartItemInCart(userId);
+            Product product= productService.findById(productId);
+            CartItem cartItemTarget= null;
+            if(cartItemList.size()>0){
+                for(CartItem index: cartItemList) {
+                    if (product.getId() == index.getProduct().getId()) {
+                        cartItemTarget= index;
+                    }
                 }
             }
+            if(cartItemTarget!= null){
+                cartItemTarget.setQuantity(cartItemTarget.getQuantity() + 1);
+                cartItemService.save(cartItemTarget);
+            } else if(cartItemTarget== null){
+                cartItemTarget= new CartItem(cart, product, 1);
+                cartItemList.add(cartItemTarget);
+                cartItemService.save(cartItemTarget);
+            }
+            return new ResponseEntity(cartItemTarget, HttpStatus.OK);
         }
-        if(cartItemTarget!= null){
-            cartItemTarget.setQuantity(cartItemTarget.getQuantity() + 1);
-            cartItemService.save(cartItemTarget);
-        } else if(cartItemTarget== null){
-            cartItemTarget= new CartItem(cart, product, 1);
-            cartItemList.add(cartItemTarget);
-            cartItemService.save(cartItemTarget);
+        catch(Exception e){
+            logger.error(String.valueOf(e));
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity(cartItemTarget, HttpStatus.OK);
+
     }
 
     //Thêm số lượng sản phẩm trong giỏ hàng
@@ -106,6 +113,7 @@ public class CartItemController {
             if(cartItems!= null && cartItems.size()>0) {
                 for(CartItem cartItem: cartItems){
                     amount+= cartItem.getQuantity()* cartItem.getProduct().getPrice();
+                    System.out.println(cartItem.getProduct().getId()+ "   "+ cartItem.getProduct().getName());
                 }
                 cart.setTotalMoney(amount);
                 cartService.save(cart);

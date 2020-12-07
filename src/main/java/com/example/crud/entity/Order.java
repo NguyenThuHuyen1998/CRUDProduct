@@ -26,8 +26,8 @@ public class Order implements Serializable {
     @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "order")
-    private List<OrderLine> orderLines;
+//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "order")
+//    private List<OrderLine> orderLines;
 
 
     @Column(name = "date_sell")
@@ -65,13 +65,13 @@ public class Order implements Serializable {
         this.user = user;
     }
 //
-    public List<OrderLine> getOrderLines() {
-        return orderLines;
-    }
-
-    public void setOrderLines(List<OrderLine> orderLines) {
-        this.orderLines = orderLines;
-    }
+//    public List<OrderLine> getOrderLines() {
+//        return orderLines;
+//    }
+//
+//    public void setOrderLines(List<OrderLine> orderLines) {
+//        this.orderLines = orderLines;
+//    }
 //
 //    public void addOrderLine(OrderLine orderLine){
 //        this.orderLine.add(orderLine);

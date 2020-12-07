@@ -28,6 +28,14 @@ public class OrderForm implements Serializable {
     public OrderForm (){
 
     }
+    public OrderForm(Order order, List<OrderLineForm> orderLines){
+        this.orderId= order.getOrderId();
+        this.userId= order.getUser().getUserId();
+        this.dateSell= order.getDateSell();
+        this.status= order.getStatus();
+        this.totalPrice= order.getTotalPrice();
+        this.orderLineList= orderLines;
+    }
     public OrderForm(long orderId, long userId, long dateSell, String status, double totalPrice, List<OrderLineForm> orderLineList){
         this.orderId= orderId;
         this.userId= userId;

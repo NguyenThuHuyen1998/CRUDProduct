@@ -61,14 +61,13 @@ public class OrderController {
             Cart cart= cartService.getCartByUserId(userId);
             if(cartItemList!= null && cartItemList.size()>0){
                 order= new Order(user, cart.getTotalMoney(), InputParam.PROCESSING, new Date().getTime());
-                List<OrderLine> orderLines= order.getOrderLines();
+                orderService.save(order);
+                List<OrderLine> orderLines= new ArrayList<>();
                 for (CartItem cartItem: cartItemList){
                     OrderLine orderLine= new OrderLine(cartItem, order);
-                    orderLines.add(orderLine);
                     orderLineService.save(orderLine);
                     cartItemService.deleteCartItem(cartItem);
                 }
-                orderService.save(order);
             }
             if(order== null){
                 return new ResponseEntity("Add product int cart!!", HttpStatus.NO_CONTENT);
@@ -95,16 +94,17 @@ public class OrderController {
     public ResponseEntity<Order> deleteOrder(@PathVariable("order-id") long orderId,
                                              @RequestParam(required = false, defaultValue = "0", name = "user-id") long userId){
         try{
-            Order order= orderService.findById(orderId);
-            if(order.getUser().getUserId()!= userId){
+            OrderForm orderForm= orderService.findById(orderId);
+            if(orderForm.getUserId()!= userId){
                 logger.error("User not permitt");
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            if(!order.getStatus().equals("processing")){
+            if(!orderForm.getStatus().equals("processing")){
                 logger.error("Can't delete this order");
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             else {
+                Order order= orderService.getOrder(orderId);
                 orderService.remove(order);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
@@ -117,15 +117,15 @@ public class OrderController {
 
     //xem chi tiết 1 đơn hàng
     @GetMapping(value = "/order/{order-id}")
-    public ResponseEntity<Order> getOrder(@PathVariable("order-id") long orderId,
+    public ResponseEntity<OrderForm> getOrder(@PathVariable("order-id") long orderId,
                                           @RequestParam("user-id") long userId){
         try{
-            Order order= orderService.findById(orderId);
-            if(order.getUser().getUserId()!= userId){
+            OrderForm orderForm= orderService.findById(orderId);
+            if(orderForm.getUserId()!= userId){
                 logger.error("User not permitt");
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>(order, HttpStatus.OK);
+            return new ResponseEntity(orderForm, HttpStatus.OK);
         }
         catch (Exception e){
             logger.error(String.valueOf(e));

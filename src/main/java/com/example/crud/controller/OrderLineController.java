@@ -43,7 +43,7 @@ public class OrderLineController {
     @PostMapping(value = "/orderLines")
     public ResponseEntity<OrderLine> createOrder(@RequestBody OrderLine orderLine){
         long orderId= orderLine.getOrder().getOrderId();
-        Order order= orderService.findById(orderId);
+        Order order= orderService.getOrder(orderId);
         if(order!= null){
             orderLineService.save(orderLine);
             //order.getOrderLine().add(orderLine);

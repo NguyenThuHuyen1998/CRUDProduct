@@ -1,18 +1,18 @@
 package com.example.crud.service;
 
 import com.example.crud.entity.Order;
-import org.aspectj.weaver.ast.Or;
+import com.example.crud.form.OrderForm;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /*
     created by HuyenNgTn on 15/11/2020
 */
 public interface OrderService {
     List<Order> findAllOrder();
-    Order findById(Long orderId);
+    OrderForm findById(Long orderId);
+    Order getOrder(Long orderId);
     List<Order> getListOrderByUserId(long userId);
     List<Order> getListOrderByStatus(String status);
     void save (Order order);
