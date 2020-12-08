@@ -3,19 +3,29 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Cart;
 import com.example.crud.entity.User;
+import com.example.crud.jwt.JwtTokenProvider;
+import com.example.crud.form.LoginRequest;
+import com.example.crud.form.LoginResponse;
+import com.example.crud.payload.RandomStuff;
 import com.example.crud.service.CartService;
 import com.example.crud.service.UserService;
+import com.example.crud.entity.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 /*
+
     created by HuyenNgTn on 15/11/2020
 */
 @RestController
@@ -25,14 +35,44 @@ public class UserController {
     private UserService userService;
     private CartService cartService;
 
-//    @Autowired
-//    private JWTServiceImpl jwtServiceImpl;
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
 
     @Autowired
     public UserController(UserService userService, CartService cartService){
         this.userService= userService;
         this.cartService= cartService;
     }
+
+    @PostMapping("/login")
+    public LoginResponse authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+
+        // Xác thực thông tin người dùng Request lên
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(),
+                        loginRequest.getPassword()
+                )
+        );
+
+        // Nếu không xảy ra exception tức là thông tin hợp lệ
+        // Set thông tin authentication vào Security Context
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Trả về jwt cho người dùng.
+        String jwt = tokenProvider.generateToken((CustomUserDetails) authentication.getPrincipal());
+        return new LoginResponse(jwt);
+    }
+
+    // Api /api/random yêu cầu phải xác thực mới có thể request
+    @GetMapping("/random")
+    public RandomStuff randomStuff(){
+        return new RandomStuff("JWT Hợp lệ mới có thể thấy được message này");
+    }
+
 
     @GetMapping(value = "/users")
     public ResponseEntity<User> getAllUser(){

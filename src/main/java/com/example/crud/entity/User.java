@@ -3,6 +3,7 @@ package com.example.crud.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,6 +18,7 @@ import java.util.List;
 */
 @Entity
 @Table(name = "tblUSERS")
+@Data
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 

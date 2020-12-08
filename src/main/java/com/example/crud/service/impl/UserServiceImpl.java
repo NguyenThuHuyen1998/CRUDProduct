@@ -1,17 +1,18 @@
 package com.example.crud.service.impl;
 
-import com.example.crud.entity.Cart;
 import com.example.crud.entity.User;
-import com.example.crud.repository.CartRepository;
 import com.example.crud.repository.UserRepository;
-import com.example.crud.service.CartService;
 import com.example.crud.service.UserService;
+import com.example.crud.entity.CustomUserDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,16 +22,14 @@ import static org.slf4j.LoggerFactory.*;
     created by HuyenNgTn on 15/11/2020
 */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService{
     public static final Logger logger = getLogger(UserServiceImpl.class);
 
     private UserRepository userRepository;
-    private CartRepository cartRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, CartRepository cartRepository){
+    public UserServiceImpl(UserRepository userRepository){
         this.userRepository= userRepository;
-        this.cartRepository= cartRepository;
     }
 
     @Override
@@ -100,5 +99,24 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        // Kiểm tra xem user có tồn tại trong database không?
+        User user = userRepository.getUserByUserName(username);
+        if (user == null) {
+            throw new UsernameNotFoundException(username);
+        }
+        return new CustomUserDetails(user);
+    }
+
+    // JWTAuthenticationFilter sẽ sử dụng hàm này
+    @Transactional
+    public UserDetails loadUserById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new UsernameNotFoundException("User not found with id : " + id)
+        );
+
+        return new CustomUserDetails(user);
+    }
 
 }

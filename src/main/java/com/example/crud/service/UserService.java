@@ -1,6 +1,7 @@
 package com.example.crud.service;
 
 import com.example.crud.entity.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,4 +17,6 @@ public interface UserService {
     boolean add (User user);
     void delete (User user);
     boolean checkLogin(User user);
+    public UserDetails loadUserById(Long id);
+    public UserDetails loadUserByUsername(String username);
 }
