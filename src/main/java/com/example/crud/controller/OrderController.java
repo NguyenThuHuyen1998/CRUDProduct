@@ -3,6 +3,7 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.*;
 import com.example.crud.form.OrderForm;
+import com.example.crud.form.OrderLineForm;
 import com.example.crud.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ public class OrderController {
 
     //lấy danh sách đơn hàng
     //user chỉ được lấy ds đơn hàng của mình nên bắt buộc có user-id
+    @CrossOrigin
     @GetMapping(value = "/orders", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Order> getAllOrder(@RequestParam(required = false, defaultValue = "") String status) {
         List<Order> orderList;
@@ -52,6 +54,7 @@ public class OrderController {
     }
 
     //tạo mới đơn hàng
+    @CrossOrigin
     @PostMapping(value = "/orders")
     public ResponseEntity<Order> createOrder(@RequestParam(name = "user-id", required = false) long userId) {
         Order order= null;
@@ -79,17 +82,27 @@ public class OrderController {
         }
     }
 
+    @CrossOrigin
     @GetMapping(value = "/orders")
-    public ResponseEntity<Order> getlistOrder(@RequestParam(name = "user-id", required = false, defaultValue = "0") long userId,
+    public ResponseEntity<OrderForm> getlistOrder(@RequestParam(name = "user-id", required = false, defaultValue = "0") long userId,
                                               @RequestParam(name = "status", required = false, defaultValue = InputParam.PROCESSING) String status,
                                               @RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
                                               @RequestParam(name = "page", required = false, defaultValue = "1") int page){
             List<Order> orderFilter= orderService.getListOrderByStatus(status);
+            List<OrderForm> orderForms= new ArrayList<>();
             if(orderFilter!= null && orderFilter.size()>0){
-                return new ResponseEntity(orderFilter, HttpStatus.OK);
+                for(Order order: orderFilter){
+                    List<OrderLine> orderLines= orderLineService.getListOrderLineInOrder(order.getOrderId());
+                    List<OrderLineForm> orderLineForms= orderLineService.getListOrderLineForm(orderLines);
+                    OrderForm orderForm= new OrderForm(order, orderLineForms);
+                    orderForms.add(orderForm);
+                }
+                return new ResponseEntity(orderForms, HttpStatus.OK);
             }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @CrossOrigin
     @DeleteMapping(value = "/orders/{order-id}")
     public ResponseEntity<Order> deleteOrder(@PathVariable("order-id") long orderId,
                                              @RequestParam(required = false, defaultValue = "0", name = "user-id") long userId){
@@ -116,6 +129,7 @@ public class OrderController {
     }
 
     //xem chi tiết 1 đơn hàng
+    @CrossOrigin
     @GetMapping(value = "/order/{order-id}")
     public ResponseEntity<OrderForm> getOrder(@PathVariable("order-id") long orderId,
                                           @RequestParam("user-id") long userId){

@@ -104,11 +104,11 @@ public class OrderForm implements Serializable {
         this.totalPrice = totalPrice;
     }
 
-//    public List<OrderLineForm> getOrderLineList() {
-//        return orderLineList;
-//    }
-//
-//    public void setOrderLineList(List<OrderLineForm> orderLineList) {
-//        this.orderLineList = orderLineList;
-//    }
+    public List<OrderLineForm> getOrderLineList() {
+        return orderLineList;
+    }
+
+    public void setOrderLineList(List<OrderLineForm> orderLineList) {
+        this.orderLineList = orderLineList;
+    }
 }

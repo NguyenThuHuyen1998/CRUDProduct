@@ -73,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
     public List<Order> getListOrderByStatus(String status) {
         try{
             Sort sort= Sort.by("dateSell").descending();
-            List<Order> list= orderRepository.getListByStatus(status, sort);
+            List<Order> list= orderRepository.getListByStatus(status);
             return list;
         }
         catch (Exception e){

@@ -34,12 +34,14 @@ public class OrderLineController {
         this.orderService= orderService;
     }
 
+    @CrossOrigin
     @GetMapping(value = "/orderLines", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OrderLine> getAllOrderLine(){
         List<OrderLine> orderList= (List<OrderLine>) orderLineService.findAllOrderLine();
         return new ResponseEntity(orderList, HttpStatus.OK);
     }
 
+    @CrossOrigin
     @PostMapping(value = "/orderLines")
     public ResponseEntity<OrderLine> createOrder(@RequestBody OrderLine orderLine){
         long orderId= orderLine.getOrder().getOrderId();
@@ -52,6 +54,7 @@ public class OrderLineController {
         return new ResponseEntity("Validator invalid", HttpStatus.BAD_REQUEST);
     }
 
+    @CrossOrigin
     @GetMapping(value = "orderLines/{order-id}")
     public ResponseEntity<OrderLine> getListOrderLine(@PathVariable("order-id") Long orderId){
         List<OrderLine> orderLines= orderLineService.getListOrderLineInOrder(orderId);

@@ -59,19 +59,19 @@ public class OrderLineServiceImpl implements OrderLineService {
 
     @Override
     public List<OrderLineForm> getListOrderLineForm(List<OrderLine> orderLineList) {
-//        List<OrderLineForm> orderLineForms= new ArrayList<>();
-//        for (OrderLine orderLine: orderLineList){
-//            orderLineForms.add(new OrderLineForm(orderLine));
-//        }
-//        return orderLineForms;
-        return orderLineList.stream().filter(Objects::isNull).map(o ->{
-            OrderLineForm orderLineForm= new OrderLineForm();
-            orderLineForm.setOrderLineId(o.getOrderLineId());
-            orderLineForm.setProductId(o.getProduct() == null? 0: o.getProduct().getId());
-            orderLineForm.setProductName(o.getProduct() == null? null: o.getProduct().getName());
-            orderLineForm.setQuantity(o.getAmount());
-            return orderLineForm;
-        }).collect(Collectors.toList());
+        List<OrderLineForm> orderLineForms= new ArrayList<>();
+        for (OrderLine orderLine: orderLineList){
+            orderLineForms.add(new OrderLineForm(orderLine));
+        }
+        return orderLineForms;
+//        return orderLineList.stream().filter(Objects::isNull).map(o ->{
+//            OrderLineForm orderLineForm= new OrderLineForm();
+//            orderLineForm.setOrderLineId(o.getOrderLineId());
+//            orderLineForm.setProductId(o.getProduct() == null? 0: o.getProduct().getId());
+//            orderLineForm.setProductName(o.getProduct() == null? null: o.getProduct().getName());
+//            orderLineForm.setQuantity(o.getAmount());
+//            return orderLineForm;
+//        }).collect(Collectors.toList());
     }
 
 }
