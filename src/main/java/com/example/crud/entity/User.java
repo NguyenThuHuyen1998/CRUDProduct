@@ -52,7 +52,7 @@ public class User implements Serializable {
 //    @JoinColumn(name = "cartId")
 //    private Cart cart;
 
-    public User() {
+    public User(User user) {
     }
 
     public User(long userId, String userName, String password, String email, String phone, String address, String role) {

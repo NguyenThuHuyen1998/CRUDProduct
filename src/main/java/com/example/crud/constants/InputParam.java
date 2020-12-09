@@ -29,7 +29,7 @@ public class InputParam {
     public static final String PAGE= "page";
     public static final String LIMIT= "limit";
     public static final String ADMIN= "admin";
-    public static final String CUSTOMER= "customer";
+    public static final String USER= "user";
     public static final String QUANTITY= "quantity";
     public static final String DATA= "data";
     public static final String PAGING= "paging";

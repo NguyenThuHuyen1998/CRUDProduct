@@ -3,10 +3,10 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Cart;
 import com.example.crud.entity.User;
-import com.example.crud.jwt.JwtTokenProvider;
 import com.example.crud.form.LoginRequest;
 import com.example.crud.form.LoginResponse;
-import com.example.crud.payload.RandomStuff;
+import com.example.crud.form.RandomStuff;
+import com.example.crud.jwt.JwtTokenProvider;
 import com.example.crud.service.CartService;
 import com.example.crud.service.UserService;
 import com.example.crud.entity.CustomUserDetails;
@@ -92,15 +92,6 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
-//    @GetMapping(value = "/users/{account}")
-//    public ResponseEntity<User> getUserByAccount(@PathVariable("account") String account){
-//        List<User> user= userService.findByAccount(account);
-//        if(user== null){
-//            logger.error("This account is not exist");
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        return new ResponseEntity(user, HttpStatus.OK);
-//    }
 
         @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
         public ResponseEntity<Object> getUserById(@PathVariable("id") long id) {
@@ -110,15 +101,7 @@ public class UserController {
             }
             return new ResponseEntity<Object>("Not Found User", HttpStatus.NO_CONTENT);
         }
-        /* ---------------- CREATE NEW USER ------------------------ */
-//        @RequestMapping(value = "/users", method = RequestMethod.POST)
-//        public ResponseEntity<String> createUser(@RequestBody User user) {
-//            if (userService.add(user)) {
-//                return new ResponseEntity<String>("Created!", HttpStatus.CREATED);
-//            } else {
-//                return new ResponseEntity<String>("User Existed!", HttpStatus.BAD_REQUEST);
-//            }
-//        }
+
         /* ---------------- không xóa user, chỉ vô hiệu hóa ------------------------ */
         @RequestMapping(value = "/users/{id}", method = RequestMethod.DELETE)
         public ResponseEntity<String> disableUser(@PathVariable("id") long id) {
@@ -168,6 +151,8 @@ public class UserController {
 //            }
 //            return new ResponseEntity<String>(result, httpStatus);
 //        }
+
+
 
         public boolean checkEnableUser(long userId){
             User user= userService.findById(userId);
