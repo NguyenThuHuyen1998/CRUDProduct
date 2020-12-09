@@ -86,7 +86,7 @@ public class UserController {
         }
 
 
-    /* ---------------- không xóa user, chỉ vô hiệu hóa ------------------------ */
+    /* ---------------- không xóa user, chỉ vô hiệu hóa ------------------------ ADMIN*/
     @RequestMapping(value = "/adminPage/users/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<String> disableUser(@PathVariable("id") long id) {
         User user= userService.findById(id);
