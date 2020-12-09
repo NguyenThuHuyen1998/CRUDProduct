@@ -37,7 +37,7 @@ public class CartItemController {
     }
 
     //thêm sản phâm vào giỏ hàng
-    @PostMapping("/carts/items/{product-id}")
+    @PostMapping("/userPage/cartItems/{product-id}")
     public ResponseEntity<CartItem> addProduct(@PathVariable(name = "product-id") long productId,
                                                @RequestParam(name = "user-id") long userId){
         // tạm thời truyền userId vào, sau lấy userId qua token nên chắc chắn user có tồn tại, không cần check
@@ -72,7 +72,7 @@ public class CartItemController {
     }
 
     //Thêm số lượng sản phẩm trong giỏ hàng
-    @PutMapping("/carts/items/{product-id}")
+    @PutMapping("/userPage/cartItems/{product-id}")
     public ResponseEntity<CartItem> updateQuantity(@PathVariable(name = "product-id") long productId,
                                                    @RequestParam(name = "user-id") long userId,
                                                    @RequestBody String data)  {
@@ -104,7 +104,7 @@ public class CartItemController {
     }
 
     //lấy danh sách sản phẩm cùng số lượng trong giỏ hàng
-    @GetMapping(value = "/carts/items")
+    @GetMapping(value = "/userPage/cartItems")
     public ResponseEntity<Cart> getListProduct(@RequestParam("user-id") long userId){
         try {
             Cart cart= cartService.getCartByUserId(userId);
@@ -127,14 +127,14 @@ public class CartItemController {
     }
 
 
-    @DeleteMapping("carts/items")
+    @DeleteMapping("/userPage/cartItems")
     public ResponseEntity<CartItem> removeAllProduct(@RequestParam(name = "user-id") long userId){
         User user= userService.findById(userId);
         cartItemService.deleteAllCartItem(userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @GetMapping(value = "/carts/items/{id}")
+    @GetMapping(value = "/userPage/cartItems/{id}")
     public ResponseEntity<CartItem> getACartItem(@PathVariable(name = "id") long id){
         try{
             CartItem cartItem= cartItemService.getCartItem(id);

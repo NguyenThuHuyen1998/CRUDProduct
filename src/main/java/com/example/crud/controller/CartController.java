@@ -36,7 +36,7 @@ public class CartController {
         this.cartItemService= cartItemService;
     }
 
-    @GetMapping(value = "/cart/{id}")
+    @GetMapping(value = "/userPage/cart/{id}")
     public ResponseEntity<Cart> getACart(@PathVariable("id") long userId){
         try{
             Cart cart= cartService.getCartByUserId(userId);

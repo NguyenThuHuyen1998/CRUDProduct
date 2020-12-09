@@ -33,16 +33,20 @@ public class OrderLineController {
         this.orderLineService= orderLineService;
         this.orderService= orderService;
     }
-
+    //không dùng đến ?
+    //lấy danh sách các sản phẩm trong order
     @CrossOrigin
-    @GetMapping(value = "/orderLines", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/userPage/orderLines", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OrderLine> getAllOrderLine(){
         List<OrderLine> orderList= (List<OrderLine>) orderLineService.findAllOrderLine();
         return new ResponseEntity(orderList, HttpStatus.OK);
     }
 
+
+    // không dùng đến ?
+    //tạo hàng hóa cho đơn
     @CrossOrigin
-    @PostMapping(value = "/orderLines")
+    @PostMapping(value = "/userPage/orderLines")
     public ResponseEntity<OrderLine> createOrder(@RequestBody OrderLine orderLine){
         long orderId= orderLine.getOrder().getOrderId();
         Order order= orderService.getOrder(orderId);
@@ -54,6 +58,8 @@ public class OrderLineController {
         return new ResponseEntity("Validator invalid", HttpStatus.BAD_REQUEST);
     }
 
+    // không dùng đến ?
+    //xem hàng hóa trong đơn
     @CrossOrigin
     @GetMapping(value = "orderLines/{order-id}")
     public ResponseEntity<OrderLine> getListOrderLine(@PathVariable("order-id") Long orderId){
@@ -66,4 +72,5 @@ public class OrderLineController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    //orderline dùng để hỗ trọ bên khác tạo order với xem thôi, không cần dùng đến API
 }

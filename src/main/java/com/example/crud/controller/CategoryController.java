@@ -1,5 +1,6 @@
 package com.example.crud.controller;
 
+import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Category;
 import com.example.crud.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -26,7 +28,7 @@ public class CategoryController {
 
 //    produces={"application/json; charset=UTF-8"}
     @CrossOrigin
-    @RequestMapping(value = "/categories", method = RequestMethod.GET)
+    @RequestMapping(value = "/adminPage/categories", method = RequestMethod.GET)
     public ResponseEntity<Category> getAll(){
         List<Category> categoryList= categoryService.findAllCategory();
         if(categoryList== null|| categoryList.size()==0){
@@ -35,7 +37,8 @@ public class CategoryController {
         return new ResponseEntity(categoryList, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/categories", method = RequestMethod.POST)
+    @RequestMapping(value = "/adminPage/categories", method = RequestMethod.POST)
+    @PreAuthorize("hasRole('" + InputParam.ADMIN + "')")
     public ResponseEntity<Category> postCategory(@RequestBody Category category, UriComponentsBuilder builder){
         categoryService.save(category);
         HttpHeaders httpHeaders= new HttpHeaders();
@@ -43,7 +46,7 @@ public class CategoryController {
         return new ResponseEntity<>(category, HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/categories/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/adminPage/categories/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Category> getCategory(@PathVariable long categoryId){
         Category category= categoryService.findById(categoryId);
         if(category== null){
@@ -53,7 +56,7 @@ public class CategoryController {
         return new ResponseEntity(category, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/categories/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/adminPage/categories/{id}", method = RequestMethod.PUT)
     public ResponseEntity<Category> updateCategory(@PathVariable("id") long categoryId, @RequestBody Category category){
         Category currentCategory= categoryService.findById(categoryId);
         if(category== null){
@@ -64,7 +67,7 @@ public class CategoryController {
         return new ResponseEntity(currentCategory, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/categories/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/adminPage/categories/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<Category> deleteCategory(@PathVariable("id") long categoryId){
         Category currentCategory= categoryService.findById(categoryId);
         if(currentCategory== null){

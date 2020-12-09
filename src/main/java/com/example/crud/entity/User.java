@@ -55,6 +55,10 @@ public class User implements Serializable {
     public User(User user) {
     }
 
+    public User(){
+
+    }
+
     public User(long userId, String userName, String password, String email, String phone, String address, String role) {
         this.userId = userId;
         this.userName = userName;
@@ -82,7 +86,6 @@ public class User implements Serializable {
         this.userName = userName;
     }
 
-    @JsonIgnore
     public String getPassword() {
         return password;
     }

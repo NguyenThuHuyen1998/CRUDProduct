@@ -33,10 +33,11 @@ public class ProductController {
         this.categoryService = categoryService;
     }
 
-    //lấy danh sách tất cả sản phẩm
+    //lấy danh sách tất cả sản phẩm dành cho user
+    // lọc theo category, khoảng giá, search keyword
     @CrossOrigin
     @ResponseBody
-    @GetMapping(value = "/products")
+    @GetMapping(value = "/userPage/products")
     public DataResult<Product> findAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
                                                   @RequestParam(required = false, defaultValue = "0") double priceMin,
                                                   @RequestParam(required = false, defaultValue = "0") double priceMax,
@@ -81,49 +82,8 @@ public class ProductController {
 //        jsonObject.put("image", product.getImage());
 //        return jsonObject;
 //    }
-    // tạo mới 1 sản phẩm
-    @CrossOrigin
-    @PostMapping(value = "/products")
-    public ResponseEntity<Product> saveProduct(@RequestBody Product product, UriComponentsBuilder builder) {
-        long categoryId = product.getCategory().getId();
-        try{
-            Category category = categoryService.findById(categoryId);
-            if (category == null) {
-                return new ResponseEntity("CategoryId is not exists", HttpStatus.BAD_REQUEST);
-            }
-            product.setCategory(category);
-            product.setDateAdd(new Date().getTime());
-            productService.save(product);
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.setLocation(builder.path("/products/{id}").buildAndExpand(product.getId()).toUri());
-        }
-        catch (Exception e){
-            logger.error(String.valueOf(e));
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(product, HttpStatus.CREATED);
-    }
 
 
-    // cập nhật tt 1 sp
-    @CrossOrigin
-    @PutMapping(value = "products/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable("id") long productId, @RequestBody Product product) {
-        Product currentProduct = productService.findById(productId);
-        if (currentProduct == null) {
-            return new ResponseEntity("Product is not exist", HttpStatus.NOT_FOUND);
-        }
-        if (product == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            currentProduct.setCategory(product.getCategory());
-            currentProduct.setName(product.getName());
-            currentProduct.setPrice(product.getPrice());
-            currentProduct.setDescription(product.getDescription());
-            productService.save(currentProduct);
-            return new ResponseEntity("Success", HttpStatus.OK);
-        }
-    }
 
     // xem chi tiết 1 sản phẩm
     @CrossOrigin
@@ -157,22 +117,6 @@ public class ProductController {
 
     }
 
-    // lấy danh sách sản phẩm theo phân loại danh mục
-    @CrossOrigin
-    @GetMapping(value = "products/cate/{id}")
-    public ResponseEntity<Product> findProductByCategory(@PathVariable("id") long categoryId) {
-        Category category = categoryService.findById(categoryId);
-        if (category == null) {
-            return new ResponseEntity("CategoryId is not exist", HttpStatus.NOT_FOUND);
-        }
-        List<Product> products = productService.findByCategoryID(categoryId);
-        if (products.size() == 0) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity(products, HttpStatus.OK);
-
-    }
-
     @CrossOrigin
     @GetMapping(value = "products/sort")
     public ResponseEntity<Product> findProductByKeyword(@RequestParam(value = "sortBy", required = false, defaultValue = "") String sortBy,
@@ -189,4 +133,87 @@ public class ProductController {
             File serverFile = new File("/home/tupva/Downloads/CRUDProduct/src/main/java/com/example/crud/image/1.png");
         return  serverFile.toPath().toString();
     }
+
+    //---------------------------------------ADMIN--------------------------------------------------
+
+    //lấy danh sách mặt hàng cho admin xem
+    // lọc theo keyword, khoảng giá, categoryId, ngày thêm sản phẩm, sắp xếp sản phẩm bán chạy/ bán ế
+    @CrossOrigin
+    @ResponseBody
+    @GetMapping(value = "/adminPage/products")
+    public DataResult<Product> findAllProductByAdmin(@RequestParam(required = false, defaultValue = "") String keyword,
+                                              @RequestParam(required = false, defaultValue = "0") double priceMin,
+                                              @RequestParam(required = false, defaultValue = "0") double priceMax,
+                                              @RequestParam(required = false, defaultValue = "0") long categoryId,
+                                              @RequestParam(required = false, defaultValue = "") String sortBy,
+                                              @RequestParam(required = false, defaultValue = "9") int limit,
+                                              @RequestParam(required = false, defaultValue = "1") int page) throws JsonProcessingException {
+        Map<String, Object> input = new HashMap<>();
+        input.put(InputParam.KEY_WORD, keyword);
+        input.put(InputParam.PRICE_MAX, priceMax);
+        input.put(InputParam.PRICE_MIN, priceMin);
+        input.put(InputParam.CATEGORY_ID, categoryId);
+        input.put(InputParam.SORT_BY, sortBy);
+        input.put(InputParam.LIMIT, limit);
+        input.put(InputParam.PAGE, page);
+        List<Product> output = new ArrayList<>();
+        output= productService.filterProduct(input);
+        List<Product> totalProduct= productService.findAllProduct();
+        if (output == null || output.size() == 0) {
+        }
+        JSONObject jsonObject= new JSONObject();
+        Map<String, Object> map= new HashMap<>();
+        ObjectImpl object= new ObjectImpl();
+        int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
+        jsonObject.put(InputParam.PAGING, object.getPagingJSONObject(totalProduct.size(), limit, totalPage, page));
+        int total_count=totalProduct.size();
+        int record_in_page=limit;
+        int total_page=(output.size())/record_in_page;
+        int current_page=page;
+        return  new DataResult(output, new DataPage(total_count,record_in_page,total_page,current_page));
+    }
+
+    // tạo mới 1 sản phẩm
+    @CrossOrigin
+    @PostMapping(value = "/adminPage/products")
+    public ResponseEntity<Product> addProduct(@RequestBody Product product, UriComponentsBuilder builder) {
+        long categoryId = product.getCategory().getId();
+        try{
+            Category category = categoryService.findById(categoryId);
+            if (category == null) {
+                return new ResponseEntity("CategoryId is not exists", HttpStatus.BAD_REQUEST);
+            }
+            product.setCategory(category);
+            product.setDateAdd(new Date().getTime());
+            productService.save(product);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setLocation(builder.path("/products/{id}").buildAndExpand(product.getId()).toUri());
+        }
+        catch (Exception e){
+            logger.error(String.valueOf(e));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(product, HttpStatus.CREATED);
+    }
+
+    // cập nhật tt 1 sp
+    @CrossOrigin
+    @PutMapping(value = "/adminPage/products/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable("id") long productId, @RequestBody Product product) {
+        Product currentProduct = productService.findById(productId);
+        if (currentProduct == null) {
+            return new ResponseEntity("Product is not exist", HttpStatus.NOT_FOUND);
+        }
+        if (product == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            currentProduct.setCategory(product.getCategory());
+            currentProduct.setName(product.getName());
+            currentProduct.setPrice(product.getPrice());
+            currentProduct.setDescription(product.getDescription());
+            productService.save(currentProduct);
+            return new ResponseEntity("Success", HttpStatus.OK);
+        }
+    }
+
 }
