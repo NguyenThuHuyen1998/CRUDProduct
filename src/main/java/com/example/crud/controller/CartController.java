@@ -4,7 +4,9 @@ import com.example.crud.entity.*;
 import com.example.crud.form.CartForm;
 import com.example.crud.service.CartItemService;
 import com.example.crud.service.CartService;
+import com.example.crud.service.JwtService;
 import com.example.crud.service.UserService;
+import com.example.crud.service.impl.JwtServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /*
@@ -25,27 +28,31 @@ public class CartController {
 
     private CartService cartService;
 
-    private UserService userService;
+    private JwtService jwtService;
 
     private CartItemService cartItemService;
 
     @Autowired
-    public CartController(CartService cartService, UserService userService, CartItemService cartItemService){
+    public CartController(CartService cartService, JwtService jwtService, CartItemService cartItemService){
         this.cartService= cartService;
-        this.userService= userService;
+        this.jwtService= jwtService;
         this.cartItemService= cartItemService;
     }
 
-    @GetMapping(value = "/userPage/cart/{id}")
-    public ResponseEntity<Cart> getACart(@PathVariable("id") long userId){
+    @GetMapping(value = "/userPage/cart")
+    public ResponseEntity<Cart> getACart(HttpServletRequest request){
         try{
-            Cart cart= cartService.getCartByUserId(userId);
-            List<CartItem> cartItemList= cartItemService.getListCartItemInCart(userId);
-            if(cartItemList.size()>0){
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            if(jwtService.isUser(request) && !jwtService.isAdmin(request)){
+                long userId= jwtService.getCurrentUser(request).getUserId();
+                Cart cart= cartService.getCartByUserId(userId);
+                List<CartItem> cartItemList= cartItemService.getListCartItemInCart(userId);
+                if(cartItemList.size()>0){
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+                CartForm cartForm= new CartForm(cart, cartItemList);
+                return new ResponseEntity(cartForm, HttpStatus.OK);
             }
-            CartForm cartForm= new CartForm(cart, cartItemList);
-            return new ResponseEntity(cartForm, HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
         }
         catch (Exception e){
             logger.error(String.valueOf(e));

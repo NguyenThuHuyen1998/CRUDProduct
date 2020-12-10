@@ -27,7 +27,7 @@ public class User implements Serializable {
     @Column(name = "user_id")
     private long userId;
 
-    @Column(name = "user_name")
+    @Column(name = "user_name", unique = true)
     private String userName;
 
     @Column(name = "pass_word")
@@ -110,7 +110,6 @@ public class User implements Serializable {
         this.phone = phone;
     }
 
-    @JsonIgnore
     public String getAddress() {
         return address;
     }

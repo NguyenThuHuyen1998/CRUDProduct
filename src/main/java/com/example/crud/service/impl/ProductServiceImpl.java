@@ -7,17 +7,12 @@ import com.example.crud.repository.CategoryRepository;
 import com.example.crud.repository.ProductRepository;
 import com.example.crud.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import org.apache.commons.collections4.ListUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -61,6 +56,20 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void remove(Product product) {
         productRepository.delete(product);
+    }
+
+    @Override
+    public void update(Product product) {
+        long productId= product.getId();
+        Product oldProduct= findById(productId);
+        oldProduct.setCategory(product.getCategory()== null? oldProduct.getCategory() : product.getCategory());
+        oldProduct.setName(product.getName()== null? oldProduct.getName() : product.getName());
+        oldProduct.setDescription(product.getDescription()== null? oldProduct.getDescription() : product.getDescription());
+        oldProduct.setPrice(product.getPrice()== 0? oldProduct.getPrice(): product.getPrice());
+        oldProduct.setImage(product.getImage()== null? oldProduct.getImage(): product.getImage());
+        oldProduct.setPreview(product.getPreview()== null? oldProduct.getPreview(): product.getPreview());
+        oldProduct.setDateAdd(new Date().getTime());
+        save(oldProduct);
     }
 
     @Override

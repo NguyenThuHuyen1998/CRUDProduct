@@ -11,14 +11,20 @@ import java.util.List;
 /*
     created by HuyenNgTn on 01/12/2020
 */
-class DataResult<T>{
+class DataResult<T> extends HttpEntity<T>{
     public static final Logger logger = LoggerFactory.getLogger(DataResult.class);
     public  DataPage dataPage;
     public  List<Product> totalProduct;
+    public HttpStatus httpStatus;
 
-    public DataResult(List<Product> totalProduct, DataPage dataPage) {
+    public DataResult(List<Product> totalProduct, DataPage dataPage, HttpStatus httpStatus) {
         this.totalProduct=totalProduct;
         this.dataPage=dataPage;
+        this.httpStatus= httpStatus;
+    }
+
+    public DataResult(HttpStatus httpStatus) {
+        this.httpStatus= httpStatus;
     }
 
 }

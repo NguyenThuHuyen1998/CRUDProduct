@@ -3,6 +3,7 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Category;
 import com.example.crud.service.CategoryService;
+import com.example.crud.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,60 +22,74 @@ import java.util.Optional;
 public class CategoryController {
 
     private CategoryService categoryService;
+    private JwtService jwtService;
 
     @Autowired
-    public CategoryController(CategoryService categoryService){
+    public CategoryController(CategoryService categoryService, JwtService jwtService){
         this.categoryService= categoryService;
+        this.jwtService= jwtService;
     }
 
 //    produces={"application/json; charset=UTF-8"}
     @CrossOrigin
-    @RequestMapping(value = "/adminPage/categories", method = RequestMethod.GET)
-    public ResponseEntity<Category> getAll(){
-        List<Category> categoryList= categoryService.findAllCategory();
-        if(categoryList== null|| categoryList.size()==0){
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @GetMapping(value = "/adminPage/categories")
+    public ResponseEntity<Category> getAll(HttpServletRequest request){
+        if(jwtService.isAdmin(request)){
+            List<Category> categoryList= categoryService.findAllCategory();
+            if(categoryList== null|| categoryList.size()==0){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity(categoryList, HttpStatus.OK);
         }
-        return new ResponseEntity(categoryList, HttpStatus.OK);
+        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    @RequestMapping(value = "/adminPage/categories", method = RequestMethod.POST)
-    @PreAuthorize("hasRole('" + InputParam.ADMIN + "')")
-    public ResponseEntity<Category> postCategory(@RequestBody Category category, UriComponentsBuilder builder){
-        categoryService.save(category);
-        HttpHeaders httpHeaders= new HttpHeaders();
-        httpHeaders.setLocation(builder.path("/categories/{id}").buildAndExpand(category.getId()).toUri());
-        return new ResponseEntity<>(category, HttpStatus.CREATED);
+    @PostMapping(value = "/adminPage/categories")
+    public ResponseEntity<Category> postCategory(@RequestBody Category category, UriComponentsBuilder builder, HttpServletRequest request){
+        if(jwtService.isAdmin(request)){
+            categoryService.save(category);
+            HttpHeaders httpHeaders= new HttpHeaders();
+            httpHeaders.setLocation(builder.path("/adminPage/categories/{id}").buildAndExpand(category.getId()).toUri());
+            return new ResponseEntity<>(category, HttpStatus.CREATED);
+        }
+        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    @RequestMapping(value = "/adminPage/categories/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Category> getCategory(@PathVariable long categoryId){
+    @GetMapping(value = "/adminPage/categories/{id}")
+    public ResponseEntity<Category> getCategory(@PathVariable long categoryId, HttpServletRequest request){
+        if(jwtService.isAdmin(request)){
         Category category= categoryService.findById(categoryId);
         if(category== null){
             return new ResponseEntity("Category not exists", HttpStatus.NO_CONTENT);
         }
 
         return new ResponseEntity(category, HttpStatus.OK);
+        }
+        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    @RequestMapping(value = "/adminPage/categories/{id}", method = RequestMethod.PUT)
-    public ResponseEntity<Category> updateCategory(@PathVariable("id") long categoryId, @RequestBody Category category){
-        Category currentCategory= categoryService.findById(categoryId);
-        if(category== null){
-            return new ResponseEntity("Input null, please check input", HttpStatus.BAD_REQUEST);
+    @PutMapping(value = "/adminPage/categories/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable("id") long categoryId, @RequestBody Category category, HttpServletRequest request){
+        if(jwtService.isAdmin(request)){
+            if (category.getId()!= categoryId){
+                return new ResponseEntity("Input wrong!", HttpStatus.BAD_REQUEST);
+            }
+
         }
-        currentCategory.setDescription(category.getDescription());
-        currentCategory.setName(category.getName());
-        return new ResponseEntity(currentCategory, HttpStatus.OK);
+        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    @RequestMapping(value = "/adminPage/categories/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<Category> deleteCategory(@PathVariable("id") long categoryId){
-        Category currentCategory= categoryService.findById(categoryId);
-        if(currentCategory== null){
-            return new ResponseEntity("Category not exists", HttpStatus.NO_CONTENT);
+    @DeleteMapping(value = "/adminPage/categories/{id}")
+    public ResponseEntity<Category> deleteCategory(@PathVariable("id") long categoryId,
+                                                   HttpServletRequest request){
+        if (jwtService.isAdmin(request)){
+            Category currentCategory= categoryService.findById(categoryId);
+            if(currentCategory== null){
+                return new ResponseEntity("Category not exists", HttpStatus.NO_CONTENT);
+            }
+            categoryService.remove(currentCategory);
+            return new ResponseEntity(HttpStatus.OK);
         }
-        categoryService.remove(currentCategory);
-        return new ResponseEntity(HttpStatus.OK);
+        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

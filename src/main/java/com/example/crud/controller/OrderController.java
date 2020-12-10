@@ -68,7 +68,6 @@ public class OrderController {
 
     //lấy danh sách đơn hàng của 1 user
     //user chỉ được lấy ds đơn hàng của mình nên bắt buộc có user-id
-    @CrossOrigin
     @GetMapping(value = "/userPage/orders")
     public ResponseEntity<OrderForm> getlistOrder(@RequestParam(name = "user-id", required = false, defaultValue = "0") long userId,
                                                   @RequestParam(name = "status", required = false, defaultValue = InputParam.PROCESSING) String status,
@@ -88,7 +87,6 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @CrossOrigin
     @DeleteMapping(value = "/userPage/orders/{order-id}")
     public ResponseEntity<Order> deleteOrder(@PathVariable("order-id") long orderId,
                                              @RequestParam(required = false, defaultValue = "0", name = "user-id") long userId) {
@@ -133,8 +131,7 @@ public class OrderController {
     //----------------------------ADMIN-----------------------------------------
 
     //admin lấy danh sách đơn đặt hàng của khách, lọc theo user-id, status, time, giá trị đơn
-    @CrossOrigin
-    @GetMapping(value = "/adminPage/orders", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/adminPage/orders")
     public ResponseEntity<Order> getAllOrder(@RequestParam(required = false, defaultValue = "") String status) {
         List<Order> orderList;
         if (!status.equals("")) {
@@ -147,7 +144,6 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @CrossOrigin
     @GetMapping(value = "/adminPage/order/{order-id}")
     public ResponseEntity<OrderForm> getOrderByAdmin(@PathVariable("order-id") long orderId,
                                               @RequestParam("user-id") long userId) {
@@ -165,8 +161,7 @@ public class OrderController {
     }
 
     //phê duyệt các đơn đang chờ xử lý <input là list các đơn>
-    @CrossOrigin
-    @GetMapping(value = "/adminPage/orders", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/adminPage/orders")
     public ResponseEntity<Order> approvalOrder(@RequestParam(required = false, defaultValue = "") String status) {
         List<Order> orderList;
         if (!status.equals("")) {
@@ -180,8 +175,7 @@ public class OrderController {
     }
 
     //xóa đơn đặt của người dùng, đơn đã đặt thành công không được phép xóa
-    @CrossOrigin
-    @GetMapping(value = "/adminPage/orders", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/adminPage/orders/{order-id}")
     public ResponseEntity<Order> deleteOrder(@RequestParam(required = false, defaultValue = "") String status) {
         List<Order> orderList;
         if (!status.equals("")) {

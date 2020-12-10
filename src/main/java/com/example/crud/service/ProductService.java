@@ -14,5 +14,6 @@ public interface ProductService {
     List<Product> filterProduct(Map<String, Object> input);
     void save (Product product);
     void remove (Product product);
+    void update(Product product);
     List<Product> filterByDateAdd(int limit, String sortBy);
 }

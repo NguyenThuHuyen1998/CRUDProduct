@@ -2,11 +2,8 @@ package com.example.crud.service.impl;
 
 import com.example.crud.entity.Cart;
 import com.example.crud.entity.CartItem;
-import com.example.crud.entity.Product;
 import com.example.crud.repository.CartItemRepository;
 import com.example.crud.repository.CartRepository;
-import com.example.crud.repository.ProductRepository;
-import com.example.crud.repository.UserRepository;
 import com.example.crud.service.CartItemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +22,10 @@ public class CartItemServiceImpl implements CartItemService {
     private CartItemRepository cartItemRepository;
 
     private CartRepository cartRepository;
-    private ProductRepository productRepository;
-    private UserRepository userRepository;
 
-    public CartItemServiceImpl(CartItemRepository cartItemRepository, CartRepository cartRepository, ProductRepository productRepository, UserRepository userRepository){
+    public CartItemServiceImpl(CartItemRepository cartItemRepository, CartRepository cartRepository){
         this.cartItemRepository = cartItemRepository;
         this.cartRepository= cartRepository;
-        this.userRepository= userRepository;
-        this.productRepository= productRepository;
     }
 
 
@@ -42,18 +35,11 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
 
-
     @Override
     public CartItem getCartLineById(long cartItemId) {
         Optional<CartItem> optionalCartItem= cartItemRepository.findById(cartItemId);
         return optionalCartItem.get();
     }
-
-    @Override
-    public CartItem getCartItemByProductId(long userId, long productId) {
-        return cartItemRepository.findCartItemByProductId(userId, productId);
-    }
-
 
     @Override
     public void updateQuantityCartItem(CartItem cartItem) {
@@ -84,6 +70,7 @@ public class CartItemServiceImpl implements CartItemService {
             logger.error(String.valueOf(e));
         }
     }
+
 
     @Override
     public List<CartItem> getListCartItemInCart(long userId) {

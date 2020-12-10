@@ -1,4 +1,4 @@
-package com.example.crud.jwt;
+package com.example.crud.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,4 +95,6 @@ public final class SecurityUtils {
         authorities.addAll(securityContext.getAuthentication().getAuthorities());
         return authorities.stream().map(grantedAuthority -> grantedAuthority.getAuthority()).collect(Collectors.toList());
     }
+
+
 }

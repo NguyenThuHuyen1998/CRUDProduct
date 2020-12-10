@@ -40,5 +40,6 @@ public class InputParam {
     public static final String PROCESSING= "processing";
     public static final String SHIPPING= "shipping";
     public static final String FINISHED= "finished";
+    public static final String AUTHORIZATION= "Authorization";
 
 }
