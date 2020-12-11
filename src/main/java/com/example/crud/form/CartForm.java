@@ -10,11 +10,13 @@ public class CartForm implements Serializable {
     private long cartId;
     private List<CartItem> cartItems;
     private double totalMoney;
+    private long userId;
 
     public CartForm(Cart cart, List<CartItem> cartItems){
         this.cartId= cart.getCartId();
         this.cartItems= cartItems;
         this.totalMoney= cart.getTotalMoney();
+        this.userId= cart.getUser().getUserId();
     }
     public long getCartId() {
         return cartId;
@@ -38,5 +40,13 @@ public class CartForm implements Serializable {
 
     public void setTotalMoney(double totalMoney) {
         this.totalMoney = totalMoney;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 }

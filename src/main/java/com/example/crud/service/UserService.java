@@ -15,6 +15,7 @@ public interface UserService {
     User findById(Long userId);
     User findByName(String userName);
     boolean add (User user);
+    void update(User user);
     void delete (User user);
     boolean checkLogin(User user);
     public UserDetails loadUserById(Long id);

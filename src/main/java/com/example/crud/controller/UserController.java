@@ -65,11 +65,11 @@ public class UserController {
             return new ResponseEntity<Object>("Not Found User", HttpStatus.NO_CONTENT);
         }
 
-
-        public boolean checkEnableUser(long userId){
-            User user= userService.findById(userId);
-            return user.isEnable();
-        }
+//
+//        public boolean checkEnableUser(long userId){
+//            User user= userService.findById(userId);
+//            return user.isEnable();
+//        }
 
 
         //-------------------------------------------ADMIN---------------------------------------------
@@ -89,36 +89,33 @@ public class UserController {
 
 
     /* ---------------- không xóa user, chỉ vô hiệu hóa ------------------------ ADMIN*/
-    @RequestMapping(value = "/adminPage/users/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<String> disableUser(@PathVariable("id") long id) {
-        User user= userService.findById(id);
-        if(user!= null){
-            user.setEnable(false);
-            userService.add(user);
-            return new ResponseEntity<String>("Disable!", HttpStatus.OK);
-        }
-        return new ResponseEntity<>("User not exist", HttpStatus.BAD_REQUEST);
-
-    }
+//    @RequestMapping(value = "/adminPage/users/{id}", method = RequestMethod.DELETE)
+//    public ResponseEntity<String> disableUser(@PathVariable("id") long id) {
+//        User user= userService.findById(id);
+//        if(user!= null){
+//            userService.add(user);
+//            return new ResponseEntity<String>("Disable!", HttpStatus.OK);
+//        }
+//        return new ResponseEntity<>("User not exist", HttpStatus.BAD_REQUEST);
+//
+//    }
 
 
     // phân quyền user làm admin
     @PostMapping(value = "/adminPage/decentralization/{id}")
-    public ResponseEntity<User> decentralizationAdmin(@PathVariable ("id") long id,
-                                                      @RequestParam ("user-id") long userId){
-        User user= userService.findById(id);
-        User currentAdmin= userService.findById(id);
-        if(user== null ) {
-            return new ResponseEntity("User yet has not been register", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<User> decentralizationAdmin(@PathVariable ("id") long id, HttpServletRequest request){
+        if(jwtHandler.isAdmin(request)){
+            User user= userService.findById(id);
+            if(user== null ) {
+                return new ResponseEntity("User yet has not been register", HttpStatus.BAD_REQUEST);
+            }
+            else {
+                user.setRole(InputParam.ADMIN);
+                userService.update(user);
+                return new ResponseEntity(user, HttpStatus.OK);
+            }
         }
-        else if(currentAdmin== null|| !currentAdmin.isEnable() || !currentAdmin.getRole().equals(InputParam.ADMIN)){
-            return new ResponseEntity("You have not permission", HttpStatus.BAD_REQUEST);
-        }
-        else {
-            user.setRole(InputParam.ADMIN);
-            userService.add(user);
-            return new ResponseEntity("Decentralization success", HttpStatus.OK);
-        }
+        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
     }
 }
 

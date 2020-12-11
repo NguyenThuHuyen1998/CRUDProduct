@@ -2,6 +2,7 @@ package com.example.crud.controller;
 
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Category;
+import com.example.crud.entity.Product;
 import com.example.crud.service.CategoryService;
 import com.example.crud.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,27 +33,40 @@ public class CategoryController {
 
 //    produces={"application/json; charset=UTF-8"}
     @CrossOrigin
-    @GetMapping(value = "/adminPage/categories")
+    @GetMapping(value = "/categories")
     public ResponseEntity<Category> getAll(HttpServletRequest request){
-        if(jwtService.isAdmin(request)){
             List<Category> categoryList= categoryService.findAllCategory();
             if(categoryList== null|| categoryList.size()==0){
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
             return new ResponseEntity(categoryList, HttpStatus.OK);
+    }
+
+    @CrossOrigin
+    @GetMapping(value = "/products/{cate-id}")
+    public ResponseEntity<Product> getListProductFromCategory(@PathVariable(name = "cate-id") long categoryId){
+        try{
+            if(categoryService.findById(categoryId)== null){
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+            List<Product> productList= categoryService.getListProductFromCategory(categoryId);
+            if(productList.size()== 0) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity(productList, HttpStatus.OK);
         }
-        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
+        catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
     }
 
     @PostMapping(value = "/adminPage/categories")
     public ResponseEntity<Category> postCategory(@RequestBody Category category, UriComponentsBuilder builder, HttpServletRequest request){
         if(jwtService.isAdmin(request)){
             categoryService.save(category);
-            HttpHeaders httpHeaders= new HttpHeaders();
-            httpHeaders.setLocation(builder.path("/adminPage/categories/{id}").buildAndExpand(category.getId()).toUri());
+//            HttpHeaders httpHeaders= new HttpHeaders();
+//            httpHeaders.setLocation(builder.path("/adminPage/categories/{id}").buildAndExpand(category.getId()).toUri());
             return new ResponseEntity<>(category, HttpStatus.CREATED);
         }
-        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You aren't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @GetMapping(value = "/adminPage/categories/{id}")
@@ -65,18 +79,19 @@ public class CategoryController {
 
         return new ResponseEntity(category, HttpStatus.OK);
         }
-        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You aren't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @PutMapping(value = "/adminPage/categories/{id}")
     public ResponseEntity<Category> updateCategory(@PathVariable("id") long categoryId, @RequestBody Category category, HttpServletRequest request){
         if(jwtService.isAdmin(request)){
-            if (category.getId()!= categoryId){
+            if (category.getId()!= categoryId || category.getId()==0){
                 return new ResponseEntity("Input wrong!", HttpStatus.BAD_REQUEST);
             }
-
+            categoryService.update(category);
+            return new ResponseEntity<>(category, HttpStatus.OK);
         }
-        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You aren't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @DeleteMapping(value = "/adminPage/categories/{id}")
@@ -90,6 +105,6 @@ public class CategoryController {
             categoryService.remove(currentCategory);
             return new ResponseEntity(HttpStatus.OK);
         }
-        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You aren't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

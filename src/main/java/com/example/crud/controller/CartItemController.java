@@ -40,7 +40,6 @@ public class CartItemController {
     @PostMapping("/userPage/cartItems/{product-id}")
     public ResponseEntity<CartItem> addProduct(@PathVariable(name = "product-id") long productId,
                                                HttpServletRequest request){
-        // tạm thời truyền userId vào, sau lấy userId qua token nên chắc chắn user có tồn tại, không cần check
         try{
             if(jwtService.isCustomer(request)){
                 long userId= jwtService.getCurrentUser(request).getUserId();

@@ -12,7 +12,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,14 +40,14 @@ public class ProductController {
     // lọc theo category, khoảng giá, search keyword
     @CrossOrigin
     @ResponseBody
-    @GetMapping(value = "/userPage/products")
-    public DataResult<Product> findAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
-                                                  @RequestParam(required = false, defaultValue = "0") double priceMin,
-                                                  @RequestParam(required = false, defaultValue = "0") double priceMax,
-                                                  @RequestParam(required = false, defaultValue = "0") long categoryId,
-                                                  @RequestParam(required = false, defaultValue = "") String sortBy,
-                                                  @RequestParam(required = false, defaultValue = "9") int limit,
-                                                  @RequestParam(required = false, defaultValue = "1") int page){
+    @GetMapping(value = "/products")
+    public ResponseEntity findAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
+                                         @RequestParam(required = false, defaultValue = "0") double priceMin,
+                                         @RequestParam(required = false, defaultValue = "0") double priceMax,
+                                         @RequestParam(required = false, defaultValue = "0") long categoryId,
+                                         @RequestParam(required = false, defaultValue = "") String sortBy,
+                                         @RequestParam(required = false, defaultValue = "9") int limit,
+                                         @RequestParam(required = false, defaultValue = "1") int page){
             Map<String, Object> input = new HashMap<>();
             input.put(InputParam.KEY_WORD, keyword);
             input.put(InputParam.PRICE_MAX, priceMax);
@@ -68,26 +67,19 @@ public class ProductController {
             int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
             jsonObject.put(InputParam.PAGING, object.getPagingJSONObject(totalProduct.size(), limit, totalPage, page));
             int total_count=totalProduct.size();
-            int record_in_page=limit;
-            int total_page=(output.size())/record_in_page;
-            int current_page=page;
-            return  new DataResult(output, new DataPage(total_count,record_in_page,total_page,current_page), HttpStatus.OK);
-
+            int recordInPage=limit;
+//            int total_page=(output.size())/record_in_page;
+            int currentPage=page;
+            //return  new DataResult(output, new DataPage(total_count,record_in_page,total_page,current_page), HttpStatus.OK);
+            Map<String, Object> paging= new HashMap<>();
+            paging.put(InputParam.RECORD_IN_PAGE, recordInPage);
+            paging.put(InputParam.TOTAL_COUNT, total_count);
+            paging.put(InputParam.CURRENT_PAGE, currentPage);
+            Map<String, Object> result= new HashMap<>();
+            result.put(InputParam.PAGING, paging);
+            result.put(InputParam.DATA, output);
+            return new ResponseEntity(result, HttpStatus.OK);
     }
-
-//    public JSONObject convertProductToJSONObject(Product product){
-//        JSONObject jsonObject= new JSONObject();
-//        jsonObject.put("product_id", product.getId());
-//        jsonObject.put("cate_id", product.getCategory());
-//        jsonObject.put("name", product.getName());
-//        jsonObject.put("price", product.getPrice());
-//        jsonObject.put("description", product.getDescription());
-//        jsonObject.put("preview", product.getPreview());
-//        jsonObject.put("dateAdd", product.getDateAdd());
-//        jsonObject.put("image", product.getImage());
-//        return jsonObject;
-//    }
-
 
 
     // xem chi tiết 1 sản phẩm
@@ -143,44 +135,44 @@ public class ProductController {
 
     //lấy danh sách mặt hàng cho admin xem
     // lọc theo keyword, khoảng giá, categoryId, ngày thêm sản phẩm, sắp xếp sản phẩm bán chạy/ bán ế
-    @CrossOrigin
-    @ResponseBody
-    @GetMapping(value = "/adminPage/products")
-    public DataResult<Product> findAllProductByAdmin(@RequestParam(required = false, defaultValue = "") String keyword,
-                                              @RequestParam(required = false, defaultValue = "0") double priceMin,
-                                              @RequestParam(required = false, defaultValue = "0") double priceMax,
-                                              @RequestParam(required = false, defaultValue = "0") long categoryId,
-                                              @RequestParam(required = false, defaultValue = "") String sortBy,
-                                              @RequestParam(required = false, defaultValue = "9") int limit,
-                                              @RequestParam(required = false, defaultValue = "1") int page,
-                                                     HttpServletRequest request) throws JsonProcessingException {
-        if(jwtService.isAdmin(request)){
-            Map<String, Object> input = new HashMap<>();
-            input.put(InputParam.KEY_WORD, keyword);
-            input.put(InputParam.PRICE_MAX, priceMax);
-            input.put(InputParam.PRICE_MIN, priceMin);
-            input.put(InputParam.CATEGORY_ID, categoryId);
-            input.put(InputParam.SORT_BY, sortBy);
-            input.put(InputParam.LIMIT, limit);
-            input.put(InputParam.PAGE, page);
-            List<Product> output = new ArrayList<>();
-            output= productService.filterProduct(input);
-            List<Product> totalProduct= productService.findAllProduct();
-            if (output == null || output.size() == 0) {
-            }
-            JSONObject jsonObject= new JSONObject();
-            Map<String, Object> map= new HashMap<>();
-            ObjectImpl object= new ObjectImpl();
-            int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
-            jsonObject.put(InputParam.PAGING, object.getPagingJSONObject(totalProduct.size(), limit, totalPage, page));
-            int total_count=totalProduct.size();
-            int record_in_page=limit;
-            int total_page=(output.size())/record_in_page;
-            int current_page=page;
-            return  new DataResult(output, new DataPage(total_count,record_in_page,total_page,current_page), HttpStatus.OK);
-        }
-        return new DataResult<>(HttpStatus.METHOD_NOT_ALLOWED);
-    }
+//    @CrossOrigin
+//    @ResponseBody
+//    @GetMapping(value = "/adminPage/products")
+//    public DataResult<Product> findAllProductByAdmin(@RequestParam(required = false, defaultValue = "") String keyword,
+//                                              @RequestParam(required = false, defaultValue = "0") double priceMin,
+//                                              @RequestParam(required = false, defaultValue = "0") double priceMax,
+//                                              @RequestParam(required = false, defaultValue = "0") long categoryId,
+//                                              @RequestParam(required = false, defaultValue = "") String sortBy,
+//                                              @RequestParam(required = false, defaultValue = "9") int limit,
+//                                              @RequestParam(required = false, defaultValue = "1") int page,
+//                                                     HttpServletRequest request) throws JsonProcessingException {
+//        if(jwtService.isAdmin(request)){
+//            Map<String, Object> input = new HashMap<>();
+//            input.put(InputParam.KEY_WORD, keyword);
+//            input.put(InputParam.PRICE_MAX, priceMax);
+//            input.put(InputParam.PRICE_MIN, priceMin);
+//            input.put(InputParam.CATEGORY_ID, categoryId);
+//            input.put(InputParam.SORT_BY, sortBy);
+//            input.put(InputParam.LIMIT, limit);
+//            input.put(InputParam.PAGE, page);
+//            List<Product> output = new ArrayList<>();
+//            output= productService.filterProduct(input);
+//            List<Product> totalProduct= productService.findAllProduct();
+//            if (output == null || output.size() == 0) {
+//            }
+//            JSONObject jsonObject= new JSONObject();
+//            Map<String, Object> map= new HashMap<>();
+//            ObjectImpl object= new ObjectImpl();
+//            int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
+//            jsonObject.put(InputParam.PAGING, object.getPagingJSONObject(totalProduct.size(), limit, totalPage, page));
+//            int total_count=totalProduct.size();
+//            int record_in_page=limit;
+//            int total_page=(output.size())/record_in_page;
+//            int current_page=page;
+//            return  new DataResult(output, new DataPage(total_count,record_in_page,total_page,current_page), HttpStatus.OK);
+//        }
+//        return new DataResult<>(HttpStatus.METHOD_NOT_ALLOWED);
+//    }
 
     // tạo mới 1 sản phẩm
     @CrossOrigin

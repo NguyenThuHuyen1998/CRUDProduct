@@ -1,6 +1,7 @@
 package com.example.crud.controller;
 
 import com.example.crud.config.JwtTokenUtil;
+import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Cart;
 import com.example.crud.entity.User;
 import com.example.crud.model.JwtRequest;
@@ -57,6 +58,7 @@ public class JwtAuthenticationController {
 	
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
 	public ResponseEntity<?> saveUser(@RequestBody User user) throws Exception {
+		user.setRole(InputParam.USER);
 		userDetailsService.save(user);
 		Cart cart= new Cart(user);
 		cartService.save(cart);

@@ -55,26 +55,42 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return null;
     }
 
+//    @Override
+//    public boolean add(User user) {
+//        List<User> userList = findAllUser();
+//        if (userList != null && userList.size() > 0) {
+//            for (User userExist : userList) {
+//                if (userExist.getUserName().equals(user.getUserName()) || userExist.getEmail().equals(user.getEmail())) {
+//                    return false;
+//                }
+//            }
+//        }
+//        userRepository.save(user);
+//        return true;
+//    }
+
     @Override
     public boolean add(User user) {
-        List<User> userList = findAllUser();
-        if (userList != null && userList.size() > 0) {
-            for (User userExist : userList) {
-                if (userExist.getUserName().equals(user.getUserName()) || userExist.getEmail().equals(user.getEmail())) {
-                    return false;
-                }
-            }
-        }
         userRepository.save(user);
         return true;
     }
-
 
     @Override
     public void delete(User user) {
         if (user != null) {
             userRepository.delete(user);
         }
+    }
+
+    @Override
+    public void update(User user) {
+        long userId = user.getUserId();
+        User oldUser = userRepository.findById(userId).get();
+        oldUser.setRole(user.getRole()== null? oldUser.getRole() : user.getRole());
+        oldUser.setAddress(user.getAddress()== null? oldUser.getAddress() : user.getAddress());
+        oldUser.setPhone(user.getPhone()== null? oldUser.getPhone() : user.getPhone());
+        oldUser.setEmail(user.getEmail()== null? oldUser.getEmail() : user.getEmail());
+        userRepository.save(user);
     }
 
     public boolean checkLogin(User user) {

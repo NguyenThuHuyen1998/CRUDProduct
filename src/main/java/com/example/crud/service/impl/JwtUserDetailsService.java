@@ -2,12 +2,8 @@ package com.example.crud.service.impl;
 
 import java.util.ArrayList;
 
-import com.example.crud.config.JwtTokenUtil;
 import com.example.crud.entity.User;
-import com.example.crud.model.DAOUser;
-import com.example.crud.model.UserDTO;
 import com.example.crud.repository.UserRepository;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -37,7 +33,6 @@ public class JwtUserDetailsService implements UserDetailsService {
 	
 	public User save(User user) {
 		user.setPassword(bcryptEncoder.encode(user.getPassword()));
-		user.setEnable(true);
 		return userRepository.save(user);
 	}
 
