@@ -42,8 +42,10 @@ public class ProductController {
     @ResponseBody
     @GetMapping(value = "/products")
     public ResponseEntity findAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
-                                         @RequestParam(required = false, defaultValue = "0") double priceMin,
-                                         @RequestParam(required = false, defaultValue = "0") double priceMax,
+                                         @RequestParam(required = false, defaultValue = "-1") double priceMin,
+                                         @RequestParam(required = false, defaultValue = "-1") double priceMax,
+                                         @RequestParam(required = false, defaultValue = "-1") long timeStart,
+                                         @RequestParam(required = false, defaultValue = "-1") long timeEnd,
                                          @RequestParam(required = false, defaultValue = "0") long categoryId,
                                          @RequestParam(required = false, defaultValue = "") String sortBy,
                                          @RequestParam(required = false, defaultValue = "9") int limit,
@@ -52,12 +54,13 @@ public class ProductController {
             input.put(InputParam.KEY_WORD, keyword);
             input.put(InputParam.PRICE_MAX, priceMax);
             input.put(InputParam.PRICE_MIN, priceMin);
+            input.put(InputParam.TIME_START, timeStart);
+            input.put(InputParam.TIME_END, timeEnd);
             input.put(InputParam.CATEGORY_ID, categoryId);
-            input.put(InputParam.SORT_BY, sortBy);
-            input.put(InputParam.LIMIT, limit);
-            input.put(InputParam.PAGE, page);
+            input.put(InputParam.SORT_BY, sortBy);;
             List<Product> output = new ArrayList<>();
             output= productService.filterProduct(input);
+
             List<Product> totalProduct= productService.findAllProduct();
             if (output == null || output.size() == 0) {
             }
@@ -68,13 +71,12 @@ public class ProductController {
             jsonObject.put(InputParam.PAGING, object.getPagingJSONObject(totalProduct.size(), limit, totalPage, page));
             int total_count=totalProduct.size();
             int recordInPage=limit;
-//            int total_page=(output.size())/record_in_page;
             int currentPage=page;
-            //return  new DataResult(output, new DataPage(total_count,record_in_page,total_page,current_page), HttpStatus.OK);
             Map<String, Object> paging= new HashMap<>();
             paging.put(InputParam.RECORD_IN_PAGE, recordInPage);
             paging.put(InputParam.TOTAL_COUNT, total_count);
             paging.put(InputParam.CURRENT_PAGE, currentPage);
+            paging.put(InputParam.TOTAL_PAGE, totalPage);
             Map<String, Object> result= new HashMap<>();
             result.put(InputParam.PAGING, paging);
             result.put(InputParam.DATA, output);
@@ -88,28 +90,11 @@ public class ProductController {
     public ResponseEntity<Product> getAProduct(@PathVariable("id") long productId) {
         try{
             Product currentProduct = productService.findById(productId);
-            if (currentProduct != null) {
-                return new ResponseEntity(currentProduct, HttpStatus.OK);
-            }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity(currentProduct, HttpStatus.OK);
         }
         catch (Exception e){
             logger.error(String.valueOf(e));
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-    }
-
-    // xóa 1 sản phẩm
-    @CrossOrigin
-    @DeleteMapping(value = "products/{id}")
-    public ResponseEntity<Product> deleteProduct(@PathVariable("id") long productId) {
-        Product product = productService.findById(productId);
-        if (product == null) {
-            return new ResponseEntity("ProductId is not exist", HttpStatus.NOT_FOUND);
-        } else {
-            productService.remove(product);
-            return new ResponseEntity("Success", HttpStatus.OK);
         }
 
     }
@@ -133,70 +118,25 @@ public class ProductController {
 
     //---------------------------------------ADMIN--------------------------------------------------
 
-    //lấy danh sách mặt hàng cho admin xem
-    // lọc theo keyword, khoảng giá, categoryId, ngày thêm sản phẩm, sắp xếp sản phẩm bán chạy/ bán ế
-//    @CrossOrigin
-//    @ResponseBody
-//    @GetMapping(value = "/adminPage/products")
-//    public DataResult<Product> findAllProductByAdmin(@RequestParam(required = false, defaultValue = "") String keyword,
-//                                              @RequestParam(required = false, defaultValue = "0") double priceMin,
-//                                              @RequestParam(required = false, defaultValue = "0") double priceMax,
-//                                              @RequestParam(required = false, defaultValue = "0") long categoryId,
-//                                              @RequestParam(required = false, defaultValue = "") String sortBy,
-//                                              @RequestParam(required = false, defaultValue = "9") int limit,
-//                                              @RequestParam(required = false, defaultValue = "1") int page,
-//                                                     HttpServletRequest request) throws JsonProcessingException {
-//        if(jwtService.isAdmin(request)){
-//            Map<String, Object> input = new HashMap<>();
-//            input.put(InputParam.KEY_WORD, keyword);
-//            input.put(InputParam.PRICE_MAX, priceMax);
-//            input.put(InputParam.PRICE_MIN, priceMin);
-//            input.put(InputParam.CATEGORY_ID, categoryId);
-//            input.put(InputParam.SORT_BY, sortBy);
-//            input.put(InputParam.LIMIT, limit);
-//            input.put(InputParam.PAGE, page);
-//            List<Product> output = new ArrayList<>();
-//            output= productService.filterProduct(input);
-//            List<Product> totalProduct= productService.findAllProduct();
-//            if (output == null || output.size() == 0) {
-//            }
-//            JSONObject jsonObject= new JSONObject();
-//            Map<String, Object> map= new HashMap<>();
-//            ObjectImpl object= new ObjectImpl();
-//            int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
-//            jsonObject.put(InputParam.PAGING, object.getPagingJSONObject(totalProduct.size(), limit, totalPage, page));
-//            int total_count=totalProduct.size();
-//            int record_in_page=limit;
-//            int total_page=(output.size())/record_in_page;
-//            int current_page=page;
-//            return  new DataResult(output, new DataPage(total_count,record_in_page,total_page,current_page), HttpStatus.OK);
-//        }
-//        return new DataResult<>(HttpStatus.METHOD_NOT_ALLOWED);
-//    }
 
     // tạo mới 1 sản phẩm
     @CrossOrigin
     @PostMapping(value = "/adminPage/products")
-    public ResponseEntity<Product> addProduct(@RequestBody Product product, UriComponentsBuilder builder, HttpServletRequest request) {
+    public ResponseEntity<Product> addProduct(@RequestBody Product product, HttpServletRequest request) {
         if(jwtService.isAdmin(request)) {
             long categoryId = product.getCategory().getId();
             try {
                 Category category = categoryService.findById(categoryId);
-                if (category == null) {
-                    return new ResponseEntity("CategoryId is not exists", HttpStatus.BAD_REQUEST);
-                }
                 product.setCategory(category);
                 product.setDateAdd(new Date().getTime());
                 productService.save(product);
-//                HttpHeaders httpHeaders = new HttpHeaders();
-//                httpHeaders.setLocation(builder.path("/products/{id}").buildAndExpand(product.getId()).toUri());
             } catch (Exception e) {
                 logger.error(String.valueOf(e));
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity( HttpStatus.BAD_REQUEST);
             }
             return new ResponseEntity<>(product, HttpStatus.CREATED);
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You isn't admin",HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     // cập nhật tt 1 sp
@@ -204,13 +144,37 @@ public class ProductController {
     @PutMapping(value = "/adminPage/products/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable("id") long productId, @RequestBody Product product, HttpServletRequest request) {
         if(jwtService.isAdmin(request)){
-            if(product.getId()== 0 || productId!= product.getId()){
-                return new ResponseEntity("Input wrong!", HttpStatus.BAD_REQUEST);
+            try{
+                Product currentProduct= productService.findById(productId);
+                if(product.getId()== 0 || productId!= product.getId()){
+                    return new ResponseEntity("Input wrong!", HttpStatus.BAD_REQUEST);
+                }
+                Product newProduct= productService.update(product);
+                return new ResponseEntity<>(newProduct, HttpStatus.OK);
             }
-            productService.update(product);
-            return new ResponseEntity<>(product, HttpStatus.OK);
+            catch (Exception e){
+                return new ResponseEntity("Product is not exist", HttpStatus.BAD_REQUEST);
+            }
         }
         return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
+
+    // xóa 1 sản phẩm
+    @CrossOrigin
+    @DeleteMapping(value = "/adminPage/products/{id}")
+    public ResponseEntity<Product> deleteProduct(@PathVariable("id") long productId,
+                                                 HttpServletRequest request) {
+        if(jwtService.isAdmin(request)){
+            try{
+                Product product = productService.findById(productId);
+                productService.remove(product);
+                return new ResponseEntity("Success", HttpStatus.OK);
+            }
+            catch (Exception e){
+                return new ResponseEntity("Product is not exist", HttpStatus.BAD_REQUEST);
+            }
+        }
+        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
+    }
 }

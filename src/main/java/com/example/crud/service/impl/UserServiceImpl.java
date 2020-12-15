@@ -86,10 +86,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public void update(User user) {
         long userId = user.getUserId();
         User oldUser = userRepository.findById(userId).get();
-        oldUser.setRole(user.getRole()== null? oldUser.getRole() : user.getRole());
-        oldUser.setAddress(user.getAddress()== null? oldUser.getAddress() : user.getAddress());
-        oldUser.setPhone(user.getPhone()== null? oldUser.getPhone() : user.getPhone());
-        oldUser.setEmail(user.getEmail()== null? oldUser.getEmail() : user.getEmail());
+        oldUser.setRole(user.getRole() == null ? oldUser.getRole() : user.getRole());
+        oldUser.setAddress(user.getAddress() == null ? oldUser.getAddress() : user.getAddress());
+        oldUser.setPhone(user.getPhone() == null ? oldUser.getPhone() : user.getPhone());
+        oldUser.setEmail(user.getEmail() == null ? oldUser.getEmail() : user.getEmail());
         userRepository.save(user);
     }
 

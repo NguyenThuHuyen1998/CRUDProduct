@@ -25,16 +25,18 @@ public class OrderLine implements Serializable {
 
     @OneToOne
     @JoinColumn(name = "product_id", nullable = false)
-    @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
     private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
     private Order order;
 
     @Column(name = "amount")
     private int amount;
+
+    @Column(name = "value_line")
+    private double valueLine;
+
 
     public OrderLine() {
     }
@@ -87,5 +89,13 @@ public class OrderLine implements Serializable {
 
     public void setAmount(int amount) {
         this.amount = amount;
+    }
+
+    public double getValueLine() {
+        return valueLine;
+    }
+
+    public void setValueLine() {
+        this.valueLine = this.amount* this.getProduct().getPrice();
     }
 }

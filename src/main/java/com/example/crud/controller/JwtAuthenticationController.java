@@ -6,31 +6,35 @@ import com.example.crud.entity.Cart;
 import com.example.crud.entity.User;
 import com.example.crud.model.JwtRequest;
 import com.example.crud.model.JwtResponse;
-import com.example.crud.model.UserDTO;
 import com.example.crud.service.CartService;
+import com.example.crud.service.JwtService;
+import com.example.crud.service.UserService;
+import io.jsonwebtoken.JwtHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.web.bind.annotation.*;
 import com.example.crud.service.impl.JwtUserDetailsService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 
 
 @RestController
 @CrossOrigin
 public class JwtAuthenticationController {
+	public static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationController.class);
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -44,7 +48,13 @@ public class JwtAuthenticationController {
 	@Autowired
 	private CartService cartService;
 
-	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private JwtService jwtService;
+
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
 
 		authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
@@ -57,12 +67,32 @@ public class JwtAuthenticationController {
 	}
 	
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ResponseEntity<?> saveUser(@RequestBody User user) throws Exception {
-		user.setRole(InputParam.USER);
-		userDetailsService.save(user);
-		Cart cart= new Cart(user);
-		cartService.save(cart);
-		return ResponseEntity.ok(user);
+	public ResponseEntity<User> saveUser(@RequestBody User user) throws Exception {
+		User currentUser= userService.findByName(user.getUserName());
+		if(currentUser!= null){
+			return new ResponseEntity("Username is exist", HttpStatus.BAD_REQUEST);
+		}
+			user.setRole(InputParam.USER);
+		//set lần cuối hoạt động để check sau 3 tháng k hoạt động thì xóa sản phẩm trong giỏ hàng
+			user.setLastActive(new Date().getTime());
+			userDetailsService.save(user);
+			Cart cart= new Cart(user);
+			cartService.save(cart);
+			return ResponseEntity.ok(user);
+
+	}
+
+	@PostMapping(value = "/logout")
+	public ResponseEntity<User> logout(HttpServletRequest request, HttpServletResponse response){
+		if(jwtService.isUser(request)){
+			return new ResponseEntity<>(HttpStatus.OK);
+		}
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null){
+           new SecurityContextLogoutHandler().logout(request, response, auth);
+        }
+		return new ResponseEntity("Login before processing", HttpStatus.BAD_REQUEST);
+
 	}
 
 	private void authenticate(String username, String password) throws Exception {

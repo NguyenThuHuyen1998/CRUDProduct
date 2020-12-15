@@ -2,6 +2,7 @@ package com.example.crud.controller;
 
 import com.example.crud.entity.*;
 import com.example.crud.form.CartForm;
+import com.example.crud.form.CartItemForm;
 import com.example.crud.service.CartItemService;
 import com.example.crud.service.CartService;
 import com.example.crud.service.JwtService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -42,14 +44,22 @@ public class CartController {
     @GetMapping(value = "/userPage/cart")
     public ResponseEntity<Cart> getACart(HttpServletRequest request){
         try{
-            if(jwtService.isUser(request) && !jwtService.isAdmin(request)){
+            if(jwtService.isCustomer(request)){
                 long userId= jwtService.getCurrentUser(request).getUserId();
                 Cart cart= cartService.getCartByUserId(userId);
                 List<CartItem> cartItemList= cartItemService.getListCartItemInCart(userId);
-                if(cartItemList.size()>0){
+                if(cartItemList.size()==0){
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 }
-                CartForm cartForm= new CartForm(cart, cartItemList);
+                double money=0;
+                List<CartItemForm> cartItemForms= new ArrayList<>();
+                for (CartItem cartItem: cartItemList){
+                    money+= cartItem.getProduct().getPrice();
+                    cartItemForms.add(new CartItemForm(cartItem));
+                }
+                cart.setTotalMoney(money);
+                cartService.save(cart);
+                CartForm cartForm= new CartForm(cart, cartItemForms);
                 return new ResponseEntity(cartForm, HttpStatus.OK);
             }
             return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);

@@ -1,11 +1,17 @@
 package com.example.crud.service.impl;
 
 import com.example.crud.entity.FeedBack;
+import com.example.crud.predicate.PredicateFeedback;
 import com.example.crud.repository.FeedbackRepository;
 import com.example.crud.service.FeedbackService;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 public class FeedbackServiceImpl implements FeedbackService {
@@ -29,6 +35,11 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
+    public List<FeedBack> findAll() {
+        return (List<FeedBack>) feedbackRepository.findAll();
+    }
+
+    @Override
     public void updateFeedback(FeedBack feedBack) {
         feedbackRepository.save(feedBack);
     }
@@ -37,4 +48,35 @@ public class FeedbackServiceImpl implements FeedbackService {
     public void deleteFeedback(FeedBack feedback) {
         feedbackRepository.delete(feedback);
     }
+
+    @Override
+    public List<FeedBack> sortByDatePost(List<FeedBack> feedBacks){
+        Collections.sort(feedBacks, new Comparator<FeedBack>() {
+            public int compare(FeedBack o1, FeedBack o2) {
+                return o1.getDatePost() < o2.getDatePost() ? 1 : (o1 == o2 ? 0 : -1);
+            }
+        });
+        return feedBacks;
+    }
+
+    @Override
+    public List<FeedBack> getFeedbackByStar(int star) {
+        Predicate<FeedBack> predicate= null;
+        PredicateFeedback predicateFeedback= new PredicateFeedback();
+        Predicate<FeedBack> checkStar= predicateFeedback.checkStar(star);
+        predicate= checkStar;
+        List<FeedBack> totalFeedback= findAll();
+        List<FeedBack> result= filterFeedback(totalFeedback, predicate);
+        return result;
+    }
+
+    public static List<FeedBack> filterFeedback (List<FeedBack> feedBacks,
+                                               Predicate<FeedBack> predicate)
+    {
+        return feedBacks.stream()
+                .filter( predicate )
+                .collect(Collectors.<FeedBack>toList());
+    }
+
+
 }

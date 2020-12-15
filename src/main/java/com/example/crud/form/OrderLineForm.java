@@ -4,6 +4,9 @@ import com.example.crud.entity.OrderLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*
     created by HuyenNgTn on 03/12/2020
 */
@@ -29,6 +32,14 @@ public class OrderLineForm {
         this.productId= orderLine.getProduct().getId();
         this.quantity= orderLine.getAmount();
         this.productName= orderLine.getProduct().getName();
+    }
+
+    public List<OrderLineForm> change(List<OrderLine> orderLineList){
+        List<OrderLineForm> orderLineForms= new ArrayList<>();
+        for (OrderLine orderLine: orderLineList){
+            orderLineForms.add(new OrderLineForm(orderLine));
+        }
+        return orderLineForms;
     }
 
     public long getOrderLineId() {

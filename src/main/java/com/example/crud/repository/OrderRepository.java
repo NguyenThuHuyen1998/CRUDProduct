@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -25,5 +26,7 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Long>
 //    @Query("select t from Order t left join fetch t.orderLine tcc where tcc.productId=: productId")
 //    List<Order> getListOrderByProductId(@Param("productId") long productId);
 
-
+    @Query("select t from Order t where t.dateSell >= :timeStart and t.dateSell <= :timeEnd")
+    List<Order> getListByTime(@Param("timeStart") long timeStart,
+                              @Param("timeEnd") long timeEnd);
 }

@@ -62,6 +62,8 @@ public class CartItemController {
                     cartItemList.add(cartItemTarget);
                     cartItemService.save(cartItemTarget);
                 }
+                cart.setTotalMoney(cart.getTotalMoney()+ cartItemTarget.getProduct().getPrice());
+                cartService.save(cart);
                 return new ResponseEntity(cartItemTarget, HttpStatus.OK);
             }
             return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);

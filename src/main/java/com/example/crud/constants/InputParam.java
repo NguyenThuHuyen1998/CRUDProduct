@@ -15,6 +15,7 @@ public class InputParam {
     public static final String PRICE_MAX= "priceMax";
     public static final String KEY_WORD= "keyword";
     public static final String CATEGORY_ID= "categoryId";
+    public static final String USER_ID= "userId";
     public static final String STATUS= "status";
     public static final String SORT_BY= "sortBy";
     public static final String SORT_PRICE= "sortPrice";
@@ -41,6 +42,10 @@ public class InputParam {
     public static final String SHIPPING= "shipping";
     public static final String FINISHED= "finished";
     public static final String AUTHORIZATION= "Authorization";
-
+    public static final String TODAY= "today";
+    public static final String THIS_WEEK= "thisWeek";
+    public static final String THIS_MONTH= "thisMonth";
+    public static final String THIS_YEAR="thisYear";
+    public static final String OPTION= "option";
 
 }

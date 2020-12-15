@@ -1,5 +1,9 @@
 package com.example.crud.controller;
 
+import com.example.crud.entity.Order;
+import com.example.crud.form.ChangePassword;
+import com.example.crud.predicate.PredicateOrderFilter;
+import com.example.crud.service.OrderService;
 import com.example.crud.service.impl.JwtServiceImpl;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.User;
@@ -9,14 +13,16 @@ import com.example.crud.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.function.Predicate;
 
 /*
 
@@ -29,6 +35,8 @@ public class UserController {
     private JwtServiceImpl jwtHandler;
     private UserService userService;
     private CartService cartService;
+    private OrderService orderService;
+    private static PasswordEncoder passwordEncoder;
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -37,56 +45,83 @@ public class UserController {
     private JwtTokenProvider tokenProvider;
 
     @Autowired
-    public UserController(UserService userService, CartService cartService, JwtServiceImpl jwtHandler){
-        this.userService= userService;
-        this.cartService= cartService;
-        this.jwtHandler= jwtHandler;
+    public UserController(UserService userService, CartService cartService, OrderService orderService, JwtServiceImpl jwtHandler, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.cartService = cartService;
+        this.orderService = orderService;
+        this.jwtHandler = jwtHandler;
+        this.passwordEncoder= passwordEncoder;
     }
 
     // xem thông tin cá nhân user
-    @RequestMapping(value = "/userPage/users/{id}", method = RequestMethod.GET)
-        public ResponseEntity<Object> getUserById(HttpHeaders header, @PathVariable("id") long id) {
-            User user = userService.findById(id);
-            if (user != null) {
-                return new ResponseEntity<Object>(user, HttpStatus.OK);
-            }
-            return new ResponseEntity<Object>("Not Found User", HttpStatus.NO_CONTENT);
+    @RequestMapping(value = "/users", method = RequestMethod.GET)
+    public ResponseEntity<Object> getDetailUser(HttpServletRequest request) {
+        if (jwtHandler.isUser(request)) {
+            long userId= jwtHandler.getCurrentUser(request).getUserId();
+            User user = userService.findById(userId);
+            return new ResponseEntity<Object>(user, HttpStatus.OK);
         }
+        return new ResponseEntity<>("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
+    }
 
 
-
-        //Thay đổi mật khẩu người dùng
-        @RequestMapping(value = "/userPage/users/{id}", method = RequestMethod.PUT)
-        public ResponseEntity<Object> changePassword(@PathVariable("id") long id) {
-            User user = userService.findById(id);
-            if (user != null) {
-                return new ResponseEntity<Object>(user, HttpStatus.OK);
-            }
-            return new ResponseEntity<Object>("Not Found User", HttpStatus.NO_CONTENT);
-        }
-
-//
-//        public boolean checkEnableUser(long userId){
-//            User user= userService.findById(userId);
-//            return user.isEnable();
-//        }
-
-
-        //-------------------------------------------ADMIN---------------------------------------------
-        //xem danh sách user hiện có và trạng thái hoạt động
-        @GetMapping(value = "/adminPage/users")
-        public ResponseEntity<User> getAllUser(HttpServletRequest request){
-            if(jwtHandler.isAdmin(request)){
-                List<User> userList= userService.findAllUser();
-                if(userList== null|| userList.size()== 0){
-                    logger.error("User list empty");
-                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    //Thay đổi mật khẩu người dùng
+    @PutMapping(value = "/user/changePassword")
+    public ResponseEntity<User> changePassword(@RequestBody ChangePassword data, HttpServletRequest request) {
+        if(jwtHandler.isUser(request)){
+            try {
+                long userId = jwtHandler.getCurrentUser(request).getUserId();
+                User user = userService.findById(userId);
+                passwordEncoder= new BCryptPasswordEncoder();
+                if(passwordEncoder.matches(data.getOldPass(), user.getPassword()) && data.validatePassword()){
+                    user.setPassword(passwordEncoder.encode(data.getNewPass()));
+                    userService.add(user);
+                    return new ResponseEntity("Success", HttpStatus.OK);
                 }
-                return new ResponseEntity(userList, HttpStatus.OK);
+                return new ResponseEntity("Not Found User", HttpStatus.BAD_REQUEST);
+            } catch (Exception e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
         }
+        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
+    }
 
+
+
+    //-------------------------------------------ADMIN---------------------------------------------
+    //xem danh sách user hiện có và trạng thái hoạt động
+    @GetMapping(value = "/adminPage/users")
+    public ResponseEntity<User> getAllUser(HttpServletRequest request) {
+        if (jwtHandler.isAdmin(request)) {
+            List<User> userList = userService.findAllUser();
+            if (userList == null || userList.size() == 0) {
+                logger.error("User list empty");
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity(userList, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @DeleteMapping(value = "/adminPage/users/{id}")
+    public ResponseEntity<User> deleteUser(@PathVariable(name = "id") long userId, HttpServletRequest request) {
+        if (jwtHandler.isAdmin(request)) {
+            User user = userService.findById(userId);
+            Predicate<Order> predicate = null;
+            PredicateOrderFilter predicateOrderFilter = PredicateOrderFilter.getInstance();
+            Predicate<Order> checkUser = predicateOrderFilter.checkUser(userId);
+            Predicate<Order> checkStatusProcessing = predicateOrderFilter.checkStatus(InputParam.PROCESSING);
+            predicate = checkUser.and(checkStatusProcessing);
+            List<Order> orderList = predicateOrderFilter.filterOrder(orderService.findAllOrder(), predicate);
+            for (Order order : orderList) {
+                orderService.remove(order);
+            }
+
+            userService.delete(user);
+            return new ResponseEntity("Success", HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+    }
 
     /* ---------------- không xóa user, chỉ vô hiệu hóa ------------------------ ADMIN*/
 //    @RequestMapping(value = "/adminPage/users/{id}", method = RequestMethod.DELETE)
@@ -103,13 +138,12 @@ public class UserController {
 
     // phân quyền user làm admin
     @PostMapping(value = "/adminPage/decentralization/{id}")
-    public ResponseEntity<User> decentralizationAdmin(@PathVariable ("id") long id, HttpServletRequest request){
-        if(jwtHandler.isAdmin(request)){
-            User user= userService.findById(id);
-            if(user== null ) {
+    public ResponseEntity<User> decentralizationAdmin(@PathVariable("id") long id, HttpServletRequest request) {
+        if (jwtHandler.isAdmin(request)) {
+            User user = userService.findById(id);
+            if (user == null) {
                 return new ResponseEntity("User yet has not been register", HttpStatus.BAD_REQUEST);
-            }
-            else {
+            } else {
                 user.setRole(InputParam.ADMIN);
                 userService.update(user);
                 return new ResponseEntity(user, HttpStatus.OK);

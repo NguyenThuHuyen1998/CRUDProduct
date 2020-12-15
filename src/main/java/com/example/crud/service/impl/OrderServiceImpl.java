@@ -3,20 +3,26 @@ package com.example.crud.service.impl;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Order;
 import com.example.crud.entity.OrderLine;
+import com.example.crud.entity.Product;
 import com.example.crud.form.OrderForm;
 import com.example.crud.form.OrderLineForm;
+import com.example.crud.predicate.PredicateOrderFilter;
 import com.example.crud.repository.OrderLineRepository;
 import com.example.crud.repository.OrderRepository;
 import com.example.crud.service.OrderService;
+import org.apache.commons.collections4.ListUtils;
+
+import java.util.*;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.stream.Collectors;
 
 /*
     created by HuyenNgTn on 15/11/2020
@@ -41,17 +47,17 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public OrderForm findById(Long orderId) {
+    public Order findById(Long orderId) {
         try{
             Order order= orderRepository.findById(orderId).get();
-            List<OrderLine> orderLines= orderLineRepository.getListOrderLineInOrder(orderId);
-            List<OrderLineForm> orderLineForms= new ArrayList<>();
-            for(OrderLine orderLine: orderLines){
-                OrderLineForm orderLineForm= new OrderLineForm(orderLine);
-                orderLineForms.add(orderLineForm);
-            }
-            OrderForm orderForm= new OrderForm(order, orderLineForms);
-            return orderForm;
+//            List<OrderLine> orderLines= orderLineRepository.getListOrderLineInOrder(orderId);
+//            List<OrderLineForm> orderLineForms= new ArrayList<>();
+//            for(OrderLine orderLine: orderLines){
+//                OrderLineForm orderLineForm= new OrderLineForm(orderLine);
+//                orderLineForms.add(orderLineForm);
+//            }
+//            OrderForm orderForm= new OrderForm(order, orderLineForms);
+            return order;
         }
         catch (Exception e){
             logger.error(String.valueOf(e));
@@ -82,6 +88,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<Order> getListOrderByTime(String timeStart, String timeEnd) {
+        Date start= new Date(timeStart+" 00:00:00");
+        Date end= new Date((timeEnd+" 23:59:59"));
+        long startTime= start.getTime();
+        long endTime= end.getTime();
+        List<Order> orderList= orderRepository.getListByTime(startTime, endTime);
+        System.out.println(orderList);
+        return orderList;
+    }
+
+    @Override
     public void save(Order order) {
         orderRepository.save(order);
     }
@@ -93,19 +110,43 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> filterOrder(Map<String, Object> filter) {
+        long userId= (long) filter.get(InputParam.USER_ID);
         String status= (String) filter.get(InputParam.STATUS);
-        int limit= (int) filter.get(InputParam.LIMIT);
-        List<Order> orderList= findAllOrder();
-        if(status!= null){
+        String dateStart= (String) filter.get(InputParam.TIME_START);
+        String dateEnd= (String) filter.get(InputParam.TIME_END);
+        double priceMin= (double) filter.get(InputParam.PRICE_MIN);
+        double priceMax= (double) filter.get(InputParam.PRICE_MAX);
+        String sortBy= (String) filter.get(InputParam.SORT_BY);
 
-        }
-        return null;
+        Predicate<Order> predicate= null;
+        PredicateOrderFilter predicateOrderFilter= PredicateOrderFilter.getInstance();
+        Predicate<Order> checkStatus= predicateOrderFilter.checkStatus(status);
+        Predicate<Order> checkPrice= predicateOrderFilter.checkPrice(priceMin, priceMax);
+        Predicate<Order> checkDate= predicateOrderFilter.checkDate(dateStart, dateEnd);
+        Predicate<Order> checkUser= predicateOrderFilter.checkUser(userId);
+        predicate= checkPrice.and(checkDate).and(checkUser).and(checkStatus);
+        List<Order> orderList=predicateOrderFilter.filterOrder(findAllOrder(), predicate);
+        orderList= sortByDateSell(orderList, sortBy);
+        return orderList;
+
     }
 
-//    @Override
-//    public List<OrderLine> getListOrderLine(Long orderId) {
-//        return orderRepository.getListOrderLineInOrder(orderId);
-//    }
 
-
+    public List<Order> sortByDateSell(List<Order> orders, String sortBy){
+        if(sortBy.equals(InputParam.INCREASE)){
+            Collections.sort(orders, new Comparator<Order>() {
+                public int compare(Order o1, Order o2) {
+                    return o1.getDateSell() > o2.getDateSell() ? 1 : (o1 == o2 ? 0 : -1);
+                }
+            });
+        }
+        if (sortBy.equals(InputParam.DECREASE)){
+            Collections.sort(orders, new Comparator<Order>() {
+                public int compare(Order o1, Order o2) {
+                    return o1.getDateSell() < o2.getDateSell() ? 1 : (o1 == o2 ? 0 : -1);
+                }
+            });
+        }
+        return orders;
+    }
 }

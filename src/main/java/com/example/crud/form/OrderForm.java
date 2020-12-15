@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 public class OrderForm implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @JsonIgnore
     private long orderId;
     private long userId;
     private long dateSell;
@@ -28,13 +27,13 @@ public class OrderForm implements Serializable {
     public OrderForm (){
 
     }
-    public OrderForm(Order order, List<OrderLineForm> orderLines){
+    public OrderForm(Order order, List<OrderLineForm> orderLineForms){
         this.orderId= order.getOrderId();
         this.userId= order.getUser().getUserId();
         this.dateSell= order.getDateSell();
         this.status= order.getStatus();
         this.totalPrice= order.getTotalPrice();
-        this.orderLineList= orderLines;
+        this.orderLineList= orderLineForms;
     }
     public OrderForm(long orderId, long userId, long dateSell, String status, double totalPrice, List<OrderLineForm> orderLineList){
         this.orderId= orderId;

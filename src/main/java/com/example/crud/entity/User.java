@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,12 +28,19 @@ public class User implements Serializable {
     @Column(name = "user_id")
     private long userId;
 
+    @NotNull
     @Column(name = "user_name", unique = true)
     private String userName;
 
+    @NotNull
+    @Column(name = "full_name")
+    private String fullName;
+
+    @NotNull
     @Column(name = "pass_word")
     protected String password;
 
+    @NotNull
     @Column(name = "email")
     private String email;
 
@@ -44,6 +52,9 @@ public class User implements Serializable {
 
     @Column(name = "role", nullable = false)
     private String role;
+
+    @Column(name ="last_active", nullable = false)
+    private long lastActive;
 //
 //    @Column(name = "enable", nullable = false)
 //    private boolean enable;
@@ -59,9 +70,10 @@ public class User implements Serializable {
 
     }
 
-    public User(long userId, String userName, String password, String email, String phone, String address, String role) {
+    public User(long userId, String userName, String fullName, String password, String email, String phone, String address, String role) {
         this.userId = userId;
         this.userName = userName;
+        this.fullName= fullName;
         this.password= password;
         this.email = email;
         this.phone = phone;
@@ -82,9 +94,18 @@ public class User implements Serializable {
         return userName;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
     public void setUserName(String userName) {
         this.userName = userName;
     }
+
 
     public String getPassword() {
         return password;
@@ -126,7 +147,15 @@ public class User implements Serializable {
         this.role = role;
     }
 
-//    public boolean isEnable() {
+    public long getLastActive() {
+        return lastActive;
+    }
+
+    public void setLastActive(long lastActive) {
+        this.lastActive = lastActive;
+    }
+
+    //    public boolean isEnable() {
 //        return enable;
 //    }
 //

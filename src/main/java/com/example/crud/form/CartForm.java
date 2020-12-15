@@ -8,13 +8,13 @@ import java.util.List;
 
 public class CartForm implements Serializable {
     private long cartId;
-    private List<CartItem> cartItems;
+    private List<CartItemForm> cartItemForms;
     private double totalMoney;
     private long userId;
 
-    public CartForm(Cart cart, List<CartItem> cartItems){
+    public CartForm(Cart cart, List<CartItemForm> cartItemForms){
         this.cartId= cart.getCartId();
-        this.cartItems= cartItems;
+        this.cartItemForms= cartItemForms;
         this.totalMoney= cart.getTotalMoney();
         this.userId= cart.getUser().getUserId();
     }
@@ -26,12 +26,12 @@ public class CartForm implements Serializable {
         this.cartId = cartId;
     }
 
-    public List<CartItem> getCartItems() {
-        return cartItems;
+    public List<CartItemForm> getCartItemForms() {
+        return cartItemForms;
     }
 
-    public void setCartItems(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
+    public void setCartItems(List<CartItemForm> cartItemForms) {
+        this.cartItemForms = cartItemForms;
     }
 
     public double getTotalMoney() {

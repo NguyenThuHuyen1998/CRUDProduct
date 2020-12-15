@@ -15,4 +15,8 @@ public interface ProductRepository extends PagingAndSortingRepository<Product, L
 
 //    @Query("select t from Product t where t.price <=: priceMax and t.price>=: priceMin and t.name like '%:keyword+%' ")
 //    List<Product> findProductByPriceKeyword(@Param("priceMax") double priceMax, @Param("priceMin") double priceMin, @Param("keyword") String keyword);
+
+//    @Query("select t from Product where t.name like concat('%',:keyword,'%') or t")
+//    List<Product> findProductByKeyword(@Param("keyword") String keyword);
+
 }

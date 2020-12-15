@@ -11,10 +11,11 @@ import java.util.Map;
 */
 public interface OrderService {
     List<Order> findAllOrder();
-    OrderForm findById(Long orderId);
+    Order findById(Long orderId);
     Order getOrder(Long orderId);
     List<Order> getListOrderByUserId(long userId);
     List<Order> getListOrderByStatus(String status);
+    List<Order> getListOrderByTime(String timeStart, String timeEnd);
     void save (Order order);
     void remove (Order order);
     List<Order> filterOrder(Map<String, Object> filter);

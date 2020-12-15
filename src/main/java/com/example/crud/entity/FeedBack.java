@@ -3,6 +3,7 @@ package com.example.crud.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
@@ -13,30 +14,37 @@ public class FeedBack implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long feedbackId;
 
+    @NotNull
     @Column(name = "content")
     private String content;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @NotNull
+    @Column(name = "star")
+    private int star;
 
+    @Column(name = "date_post")
+    private long datePost;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
     public FeedBack() {
     }
 
-    public FeedBack(String content, Product product, Order order, User user) {
+    public FeedBack(String content, int star, Order order, long datePost) {
         this.content = content;
-        this.product = product;
+        this.star= star;
         this.order = order;
-        this.user = user;
+        this.datePost= datePost;
+    }
+
+    public int getStar() {
+        return star;
+    }
+
+    public void setStar(int star) {
+        this.star = star;
     }
 
     public long getFeedbackId() {
@@ -55,14 +63,6 @@ public class FeedBack implements Serializable {
         this.content = content;
     }
 
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
     public Order getOrder() {
         return order;
     }
@@ -71,11 +71,11 @@ public class FeedBack implements Serializable {
         this.order = order;
     }
 
-    public User getUser() {
-        return user;
+    public long getDatePost() {
+        return datePost;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setDatePost(long datePost) {
+        this.datePost = datePost;
     }
 }

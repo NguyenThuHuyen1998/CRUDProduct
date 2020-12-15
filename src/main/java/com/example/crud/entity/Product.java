@@ -25,7 +25,7 @@ public class Product implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cate_id", nullable = false)
-    @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
+//    @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
     private Category category;
 
     @Column(name = "name")
@@ -45,12 +45,6 @@ public class Product implements Serializable {
 
     @Column(name = "image")
     private String image;
-
-//    @ManyToMany
-//    @JoinTable(name = "product_cart__",
-//            joinColumns = @JoinColumn(name = "product_id"),  // TRong đó, khóa ngoại chính là address_id trỏ tới class hiện tại (Address)
-//            inverseJoinColumns = @JoinColumn(name = "cart_id") //Khóa ngoại thứ 2 trỏ tới thuộc tính ở dưới (Person)
-//    )
 
     public Product() {
     }
@@ -82,6 +76,10 @@ public class Product implements Serializable {
         return category;
     }
 
+    public long categoryId(){
+        return category.getId();
+    }
+
     public void setCategory(Category category) {
         this.category = category;
     }
@@ -102,7 +100,6 @@ public class Product implements Serializable {
         this.price = price;
     }
 
-    @JsonIgnore
     public String getDescription() {
         return description;
     }
@@ -120,9 +117,12 @@ public class Product implements Serializable {
     }
 
     public String getDateAdd() {
-        long dateLong= dateAdd;
         Timestamp ts =new Timestamp(dateAdd);
         return ts.toString();
+    }
+
+    public long getDate(){
+        return dateAdd;
     }
 
     public void setDateAdd(long dateAdd) {
@@ -136,13 +136,5 @@ public class Product implements Serializable {
     public void setImage(String image) {
         this.image = image;
     }
-
-//    public List<FeedBack> getFeedback() {
-//        return feedback;
-//    }
-//
-//    public void setFeedback(List<FeedBack> feedback) {
-//        this.feedback = feedback;
-//    }
 
 }
