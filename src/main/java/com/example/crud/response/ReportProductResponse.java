@@ -1,11 +1,11 @@
-package com.example.crud.form;
+package com.example.crud.response;
 
-public class ReportProduct {
+public class ReportProductResponse {
     private String productName;
     private int quantity;
     private double revenue;
 
-    public ReportProduct(String productName, int quantity, double revenue) {
+    public ReportProductResponse(String productName, int quantity, double revenue) {
         this.productName = productName;
         this.quantity = quantity;
         this.revenue = revenue;

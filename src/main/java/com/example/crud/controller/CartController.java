@@ -1,17 +1,14 @@
 package com.example.crud.controller;
 
 import com.example.crud.entity.*;
-import com.example.crud.form.CartForm;
-import com.example.crud.form.CartItemForm;
+import com.example.crud.response.CartResponse;
+import com.example.crud.response.CartItemResponse;
 import com.example.crud.service.CartItemService;
 import com.example.crud.service.CartService;
 import com.example.crud.service.JwtService;
-import com.example.crud.service.UserService;
-import com.example.crud.service.impl.JwtServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,15 +49,15 @@ public class CartController {
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 }
                 double money=0;
-                List<CartItemForm> cartItemForms= new ArrayList<>();
+                List<CartItemResponse> cartItemResponses = new ArrayList<>();
                 for (CartItem cartItem: cartItemList){
                     money+= cartItem.getProduct().getPrice();
-                    cartItemForms.add(new CartItemForm(cartItem));
+                    cartItemResponses.add(new CartItemResponse(cartItem));
                 }
                 cart.setTotalMoney(money);
                 cartService.save(cart);
-                CartForm cartForm= new CartForm(cart, cartItemForms);
-                return new ResponseEntity(cartForm, HttpStatus.OK);
+                CartResponse cartResponse = new CartResponse(cart, cartItemResponses);
+                return new ResponseEntity(cartResponse, HttpStatus.OK);
             }
             return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
         }

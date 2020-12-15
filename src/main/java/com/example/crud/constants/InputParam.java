@@ -18,13 +18,10 @@ public class InputParam {
     public static final String USER_ID= "userId";
     public static final String STATUS= "status";
     public static final String SORT_BY= "sortBy";
-    public static final String SORT_PRICE= "sortPrice";
     public static final String BEST_SELLER= "bestSeller";
     public static final String INCREASE= "increase";
     public static final String DECREASE= "decrease";
     public static final String NEWEST= "newest";
-    public static final String NEWEST_LIMIT= "newest_limit";
-    public static final String USER_NAME= "aud";
     public static final String ROLE= "sub";
     public static final int LIMIT_DEFAULT= 10;
     public static final String PAGE= "page";
@@ -41,6 +38,7 @@ public class InputParam {
     public static final String PROCESSING= "processing";
     public static final String SHIPPING= "shipping";
     public static final String FINISHED= "finished";
+    public static final String CANCEL= "cancel";
     public static final String AUTHORIZATION= "Authorization";
     public static final String TODAY= "today";
     public static final String THIS_WEEK= "thisWeek";

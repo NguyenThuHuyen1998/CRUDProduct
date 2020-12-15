@@ -1,8 +1,9 @@
-package com.example.crud.form;
+package com.example.crud.response;
 
 import com.example.crud.entity.Order;
 import com.example.crud.entity.OrderLine;
 import com.example.crud.entity.User;
+import com.example.crud.form.OrderLineForm;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 /*
     created by HuyenNgTn on 03/12/2020
 */
-public class OrderForm implements Serializable {
+public class OrderResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private long orderId;
@@ -24,10 +25,10 @@ public class OrderForm implements Serializable {
     private double totalPrice;
     private List<OrderLineForm> orderLineList;
 
-    public OrderForm (){
+    public OrderResponse(){
 
     }
-    public OrderForm(Order order, List<OrderLineForm> orderLineForms){
+    public OrderResponse(Order order, List<OrderLineForm> orderLineForms){
         this.orderId= order.getOrderId();
         this.userId= order.getUser().getUserId();
         this.dateSell= order.getDateSell();
@@ -35,7 +36,7 @@ public class OrderForm implements Serializable {
         this.totalPrice= order.getTotalPrice();
         this.orderLineList= orderLineForms;
     }
-    public OrderForm(long orderId, long userId, long dateSell, String status, double totalPrice, List<OrderLineForm> orderLineList){
+    public OrderResponse(long orderId, long userId, long dateSell, String status, double totalPrice, List<OrderLineForm> orderLineList){
         this.orderId= orderId;
         this.userId= userId;
         this.dateSell= dateSell;

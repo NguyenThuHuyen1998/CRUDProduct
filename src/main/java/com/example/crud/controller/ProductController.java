@@ -3,7 +3,9 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Category;
 import com.example.crud.entity.Product;
+import com.example.crud.response.ResponseMessage;
 import com.example.crud.service.CategoryService;
+import com.example.crud.service.FilesStorageService;
 import com.example.crud.service.JwtService;
 import com.example.crud.service.ProductService;
 import com.example.crud.service.impl.ObjectImpl;
@@ -12,9 +14,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,12 +32,16 @@ public class ProductController {
     private ProductService productService;
     private CategoryService categoryService;
     private JwtService jwtService;
+    private FilesStorageService storageService;
 
+    @Value("${file.upload-dir}")
+    private String fileDir;
     @Autowired
-    public ProductController(ProductService productService, CategoryService categoryService, JwtService jwtService) {
+    public ProductController(ProductService productService, CategoryService categoryService, JwtService jwtService, FilesStorageService filesStorageService) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.jwtService= jwtService;
+        this.storageService= filesStorageService;
     }
 
     //lấy danh sách tất cả sản phẩm dành cho user
@@ -41,7 +49,7 @@ public class ProductController {
     @CrossOrigin
     @ResponseBody
     @GetMapping(value = "/products")
-    public ResponseEntity findAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
+    public ResponseEntity getAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMin,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMax,
                                          @RequestParam(required = false, defaultValue = "-1") long timeStart,
@@ -120,15 +128,28 @@ public class ProductController {
 
 
     // tạo mới 1 sản phẩm
+
     @CrossOrigin
     @PostMapping(value = "/adminPage/products")
-    public ResponseEntity<Product> addProduct(@RequestBody Product product, HttpServletRequest request) {
+    public ResponseEntity<Product> addProduct(@RequestParam("name") String name,
+                                              @RequestParam("price") double price,
+                                              @RequestParam("categoryId") long categoryId,
+                                              @RequestParam("description") String description,
+                                              @RequestParam("preview") String preview,
+                                              @RequestParam("image") MultipartFile image,
+                                              HttpServletRequest request) {
         if(jwtService.isAdmin(request)) {
-            long categoryId = product.getCategory().getId();
+            Product product= new Product();
             try {
                 Category category = categoryService.findById(categoryId);
                 product.setCategory(category);
+                product.setName(name);
                 product.setDateAdd(new Date().getTime());
+                product.setDescription(description);
+                product.setPreview(preview);
+                product.setPrice(price);
+                storageService.save(image);
+                product.setImage(fileDir+ image.getOriginalFilename());
                 productService.save(product);
             } catch (Exception e) {
                 logger.error(String.valueOf(e));
@@ -172,7 +193,8 @@ public class ProductController {
                 return new ResponseEntity("Success", HttpStatus.OK);
             }
             catch (Exception e){
-                return new ResponseEntity("Product is not exist", HttpStatus.BAD_REQUEST);
+                logger.error(e.getMessage());
+                return new ResponseEntity(HttpStatus.BAD_REQUEST);
             }
         }
         return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);

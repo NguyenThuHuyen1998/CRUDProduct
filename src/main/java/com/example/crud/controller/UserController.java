@@ -1,7 +1,7 @@
 package com.example.crud.controller;
 
 import com.example.crud.entity.Order;
-import com.example.crud.form.ChangePassword;
+import com.example.crud.form.ChangePasswordForm;
 import com.example.crud.predicate.PredicateOrderFilter;
 import com.example.crud.service.OrderService;
 import com.example.crud.service.impl.JwtServiceImpl;
@@ -10,6 +10,9 @@ import com.example.crud.entity.User;
 import com.example.crud.jwt.JwtTokenProvider;
 import com.example.crud.service.CartService;
 import com.example.crud.service.UserService;
+import netscape.javascript.JSObject;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -34,7 +38,6 @@ public class UserController {
 
     private JwtServiceImpl jwtHandler;
     private UserService userService;
-    private CartService cartService;
     private OrderService orderService;
     private static PasswordEncoder passwordEncoder;
 
@@ -42,19 +45,15 @@ public class UserController {
     AuthenticationManager authenticationManager;
 
     @Autowired
-    private JwtTokenProvider tokenProvider;
-
-    @Autowired
-    public UserController(UserService userService, CartService cartService, OrderService orderService, JwtServiceImpl jwtHandler, PasswordEncoder passwordEncoder) {
+    public UserController(UserService userService, OrderService orderService, JwtServiceImpl jwtHandler, PasswordEncoder passwordEncoder) {
         this.userService = userService;
-        this.cartService = cartService;
         this.orderService = orderService;
         this.jwtHandler = jwtHandler;
         this.passwordEncoder= passwordEncoder;
     }
 
     // xem thông tin cá nhân user
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
+    @RequestMapping(value = "/userPage/users", method = RequestMethod.GET)
     public ResponseEntity<Object> getDetailUser(HttpServletRequest request) {
         if (jwtHandler.isUser(request)) {
             long userId= jwtHandler.getCurrentUser(request).getUserId();
@@ -67,7 +66,7 @@ public class UserController {
 
     //Thay đổi mật khẩu người dùng
     @PutMapping(value = "/user/changePassword")
-    public ResponseEntity<User> changePassword(@RequestBody ChangePassword data, HttpServletRequest request) {
+    public ResponseEntity<User> changePassword(@RequestBody ChangePasswordForm data, HttpServletRequest request) {
         if(jwtHandler.isUser(request)){
             try {
                 long userId = jwtHandler.getCurrentUser(request).getUserId();
@@ -87,6 +86,22 @@ public class UserController {
     }
 
 
+    @PostMapping(value = "/user/forgetPassword")
+    public ResponseEntity<User> forgetPassword(@RequestBody String data){
+        JSONObject jsonObject= new JSONObject(data);
+        String userName= jsonObject.getString("userName");
+        try{
+            User user= userService.findByName(userName);
+            int randomStrLength= 10;
+            char[] possibleCharacters = (new String("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&*()-_=+[{]}\\|;:\'\",<.>/?")).toCharArray();
+            String randomStr = RandomStringUtils.random( randomStrLength, 0, possibleCharacters.length-1, false, false, possibleCharacters, new SecureRandom() );
+            user.setPassword(randomStr);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        catch (Exception e){
+            return new ResponseEntity("Username is not exist", HttpStatus.BAD_REQUEST);
+        }
+    }
 
     //-------------------------------------------ADMIN---------------------------------------------
     //xem danh sách user hiện có và trạng thái hoạt động

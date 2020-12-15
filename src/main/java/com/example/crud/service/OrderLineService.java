@@ -1,12 +1,9 @@
 package com.example.crud.service;
 
-import com.example.crud.entity.Order;
 import com.example.crud.entity.OrderLine;
-import com.example.crud.form.OrderForm;
 import com.example.crud.form.OrderLineForm;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface OrderLineService {
     List<OrderLine> findAllOrderLine();

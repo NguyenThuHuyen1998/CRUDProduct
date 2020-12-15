@@ -2,10 +2,11 @@ package com.example.crud.controller;
 
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.*;
-import com.example.crud.form.OrderForm;
+import com.example.crud.response.OrderResponse;
 import com.example.crud.form.OrderLineForm;
-import com.example.crud.predicate.PredicateOrderFilter;
 import com.example.crud.service.*;
+import org.apache.commons.lang3.time.CalendarUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Predicate;
 
 /*
     created by HuyenNgTn on 15/11/2020
@@ -29,6 +31,7 @@ public class OrderController {
     private CartItemService cartItemService;
     private UserService userService;
     private OrderLineService orderLineService;
+    private SendEmailService emailService;
     private JwtService jwtService;
 
     @Autowired
@@ -84,15 +87,15 @@ public class OrderController {
     //lấy danh sách đơn hàng của 1 user
     //user chỉ được lấy ds đơn hàng của mình nên bắt buộc có user-id
     @GetMapping(value = "/userPage/orders")
-    public ResponseEntity<OrderForm> getlistOrder(@RequestParam(name = "status", required = true, defaultValue = InputParam.PROCESSING) String status,
-                                                  @RequestParam(name = "dateStart", required = false, defaultValue = "-1") String dateStart,
-                                                  @RequestParam(name = "dateEnd", required = false, defaultValue = "-1") String dateEnd,
-                                                  @RequestParam(name = "priceMin", required = false, defaultValue = "-1") double priceMin,
-                                                  @RequestParam(name = "priceMax", required = false, defaultValue = "-1") double priceMax,
-                                                  @RequestParam(name = "sortBy", required = false, defaultValue = InputParam.DECREASE) String sortBy,
-                                                  @RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
-                                                  @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                                  HttpServletRequest request) {
+    public ResponseEntity<OrderResponse> getlistOrder(@RequestParam(name = "status", required = true, defaultValue = InputParam.PROCESSING) String status,
+                                                      @RequestParam(name = "dateStart", required = false, defaultValue = "-1") String dateStart,
+                                                      @RequestParam(name = "dateEnd", required = false, defaultValue = "-1") String dateEnd,
+                                                      @RequestParam(name = "priceMin", required = false, defaultValue = "-1") double priceMin,
+                                                      @RequestParam(name = "priceMax", required = false, defaultValue = "-1") double priceMax,
+                                                      @RequestParam(name = "sortBy", required = false, defaultValue = InputParam.DECREASE) String sortBy,
+                                                      @RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
+                                                      @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                      HttpServletRequest request) {
         if(jwtService.isCustomer(request)){
 
             long userId= jwtService.getCurrentUser(request).getUserId();
@@ -107,38 +110,37 @@ public class OrderController {
 
             List<Order> orderFilter = orderService.filterOrder(filter);
             List<Order> orderTotal= orderService.getListOrderByUserId(userId);
-            List<OrderForm> orderForms = new ArrayList<>();
+            List<OrderResponse> orderResponses = new ArrayList<>();
             Map<String, Object> result= new HashMap<>();
-
 
             if (orderFilter != null && orderFilter.size() > 0) {
                 for (Order order : orderFilter) {
                     List<OrderLine> orderLines = orderLineService.getListOrderLineInOrder(order.getOrderId());
                     List<OrderLineForm> orderLineForms = orderLineService.getListOrderLineForm(orderLines);
-                    OrderForm orderForm = new OrderForm(order, orderLineForms);
-                    orderForms.add(orderForm);
+                    OrderResponse orderResponse = new OrderResponse(order, orderLineForms);
+                    orderResponses.add(orderResponse);
                 }
-                result.put(InputParam.DATA, orderForms);
-                Map<String, Object> paging= new HashMap<>();
-                int totalPage = (orderTotal.size()) / limit + ((orderTotal.size() % limit == 0) ? 0 : 1);
-                int recordInPage=limit;
-                int currentPage=page;
-                int totalCount=orderTotal.size();
-                paging.put(InputParam.RECORD_IN_PAGE, recordInPage);
-                paging.put(InputParam.TOTAL_COUNT, totalCount);
-                paging.put(InputParam.CURRENT_PAGE, currentPage);
-                paging.put(InputParam.TOTAL_PAGE, totalPage);
-                result.put(InputParam.PAGING, paging);
-                return new ResponseEntity(result, HttpStatus.OK);
+                result.put(InputParam.DATA, orderResponses);
+
             }
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            Map<String, Object> paging= new HashMap<>();
+            int totalPage = (orderTotal.size()) / limit + ((orderTotal.size() % limit == 0) ? 0 : 1);
+            int recordInPage=limit;
+            int currentPage=page;
+            int totalCount=orderTotal.size();
+            paging.put(InputParam.RECORD_IN_PAGE, recordInPage);
+            paging.put(InputParam.TOTAL_COUNT, totalCount);
+            paging.put(InputParam.CURRENT_PAGE, currentPage);
+            paging.put(InputParam.TOTAL_PAGE, totalPage);
+            result.put(InputParam.PAGING, paging);
+            return new ResponseEntity(result, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     //Xóa 1 đơn hàng
     @DeleteMapping(value = "/userPage/orders/{order-id}")
-    public ResponseEntity<Order> deleteOrder(@PathVariable("order-id") long orderId,
+    public ResponseEntity<Order> cancelOrder(@PathVariable("order-id") long orderId,
                                              HttpServletRequest request) {
         if(jwtService.isCustomer(request)){
             long userId= jwtService.getCurrentUser(request).getUserId();
@@ -152,11 +154,12 @@ public class OrderController {
                     logger.error("Can't delete this order");
                     return new ResponseEntity("You can't delete this order", HttpStatus.BAD_REQUEST);
                 } else {
-                    List<OrderLine> orderLines= orderLineService.getListOrderLineInOrder(orderId);
-                    for(OrderLine orderLine: orderLines){
-                        orderLineService.remove(orderLine);
-                    }
-                    orderService.remove(order);
+//                    List<OrderLine> orderLines= orderLineService.getListOrderLineInOrder(orderId);
+//                    for(OrderLine orderLine: orderLines){
+//                        orderLineService.remove(orderLine);
+//                    }
+                    order.setStatus(InputParam.CANCEL);
+                    orderService.save(order);
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
             } catch (Exception e) {
@@ -170,20 +173,20 @@ public class OrderController {
     //xem chi tiết 1 đơn hàng
     @CrossOrigin
     @GetMapping(value = "/userPage/orders/{order-id}")
-    public ResponseEntity<OrderForm> getOrder(@PathVariable("order-id") long orderId,
-                                              HttpServletRequest request) {
+    public ResponseEntity<OrderResponse> getOrder(@PathVariable("order-id") long orderId,
+                                                  HttpServletRequest request) {
         if(jwtService.isCustomer(request)){
             long userId= jwtService.getCurrentUser(request).getUserId();
             try {
                 Order order= orderService.findById(orderId);
                 List<OrderLine> orderLines= orderLineService.getListOrderLineInOrder(orderId);
                 List<OrderLineForm> orderLineForms= new OrderLineForm().change(orderLines);
-                OrderForm orderForm= new OrderForm(order, orderLineForms);
+                OrderResponse orderResponse = new OrderResponse(order, orderLineForms);
                 if (order.getUser().getUserId() != userId) {
                     logger.error("User not permitt");
                     return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
                 }
-                return new ResponseEntity(orderForm, HttpStatus.OK);
+                return new ResponseEntity(orderResponse, HttpStatus.OK);
             } catch (Exception e) {
                 logger.error(String.valueOf(e));
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -218,16 +221,16 @@ public class OrderController {
 
     //admin lấy danh sách đơn đặt hàng của khách, lọc theo user-id, productId, status, time, giá trị đơn
     @GetMapping(value = "/adminPage/orders")
-    public ResponseEntity<OrderForm> getlistOrderByAdmin(@RequestParam(name = "status", required = true, defaultValue = InputParam.PROCESSING) String status,
-                                                  @RequestParam(name = "dateStart", required = false, defaultValue = "-1") String dateStart,
-                                                  @RequestParam(name = "dateEnd", required = false, defaultValue = "-1") String dateEnd,
-                                                  @RequestParam(name = "priceMin", required = false, defaultValue = "-1") double priceMin,
-                                                  @RequestParam(name = "priceMax", required = false, defaultValue = "-1") double priceMax,
-                                                  @RequestParam(name = "userId", required = false, defaultValue = "-1") long userId,
-                                                  @RequestParam(name = "sortBy", required = false, defaultValue = InputParam.DECREASE) String sortBy,
-                                                  @RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
-                                                  @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                                  HttpServletRequest request) {
+    public ResponseEntity<OrderResponse> getlistOrderByAdmin(@RequestParam(name = "status", required = true, defaultValue = InputParam.PROCESSING) String status,
+                                                             @RequestParam(name = "dateStart", required = false, defaultValue = "-1") String dateStart,
+                                                             @RequestParam(name = "dateEnd", required = false, defaultValue = "-1") String dateEnd,
+                                                             @RequestParam(name = "priceMin", required = false, defaultValue = "-1") double priceMin,
+                                                             @RequestParam(name = "priceMax", required = false, defaultValue = "-1") double priceMax,
+                                                             @RequestParam(name = "userId", required = false, defaultValue = "-1") long userId,
+                                                             @RequestParam(name = "sortBy", required = false, defaultValue = InputParam.DECREASE) String sortBy,
+                                                             @RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
+                                                             @RequestParam(name = "page", required = false, defaultValue = "1") int page,
+                                                             HttpServletRequest request) {
         if(jwtService.isAdmin(request)){
             Map<String, Object> filter= new HashMap<>();
             filter.put(InputParam.USER_ID, userId);
@@ -240,7 +243,7 @@ public class OrderController {
 
             List<Order> orderFilter = orderService.filterOrder(filter);
             List<Order> orderTotal= orderService.getListOrderByUserId(userId);
-            List<OrderForm> orderForms = new ArrayList<>();
+            List<OrderResponse> orderResponses = new ArrayList<>();
             Map<String, Object> result= new HashMap<>();
 
 
@@ -248,10 +251,10 @@ public class OrderController {
                 for (Order order : orderFilter) {
                     List<OrderLine> orderLines = orderLineService.getListOrderLineInOrder(order.getOrderId());
                     List<OrderLineForm> orderLineForms = orderLineService.getListOrderLineForm(orderLines);
-                    OrderForm orderForm = new OrderForm(order, orderLineForms);
-                    orderForms.add(orderForm);
+                    OrderResponse orderResponse = new OrderResponse(order, orderLineForms);
+                    orderResponses.add(orderResponse);
                 }
-                result.put(InputParam.DATA, orderForms);
+                result.put(InputParam.DATA, orderResponses);
                 Map<String, Object> paging= new HashMap<>();
                 int totalPage = (orderTotal.size()) / limit + ((orderTotal.size() % limit == 0) ? 0 : 1);
                 int recordInPage=limit;
@@ -270,21 +273,21 @@ public class OrderController {
     }
 
     @GetMapping(value = "/adminPage/order/{order-id}")
-    public ResponseEntity<OrderForm> getOrderByAdmin(@PathVariable("order-id") long orderId,
-                                                     HttpServletRequest request) {
-        if(jwtService.isCustomer(request)){
+    public ResponseEntity<OrderResponse> getOrderByAdmin(@PathVariable("order-id") long orderId,
+                                                         HttpServletRequest request) {
+        if(jwtService.isAdmin(request)){
             try {
                 Order order = orderService.findById(orderId);
                 List<OrderLine> orderLine= orderLineService.getListOrderLineInOrder(orderId);
                 List<OrderLineForm> orderLineForms= new OrderLineForm().change(orderLine);
-                OrderForm orderForm= new OrderForm(order, orderLineForms);
-                return new ResponseEntity(orderForm, HttpStatus.OK);
+                OrderResponse orderResponse = new OrderResponse(order, orderLineForms);
+                return new ResponseEntity(orderResponse, HttpStatus.OK);
             } catch (Exception e) {
                 logger.error(String.valueOf(e));
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You aren't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     //phê duyệt các đơn đang chờ xử lý <input là list các đơn>
@@ -302,6 +305,12 @@ public class OrderController {
                     }
                     order.setStatus(InputParam.SHIPPING);
                     orderService.save(order);
+
+                    // send email notification
+                    DateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
+                    String date= dateFormat.format(DateUtils.addDays(new Date(), 7));
+                    String message= "Đơn hàng có mã "+ order.getOrderId()+ " của bạn đã được giao cho shipper. Đơn sẽ được giao muộn nhất vào ngày " + date+". Hãy để ý điện thoại.";
+                    emailService.notifyOrder(message, user.getEmail());
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
                 else {
@@ -326,10 +335,12 @@ public class OrderController {
                 if (!order.getStatus().equals(InputParam.PROCESSING)) {
                     return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
                 }
-                List<OrderLine> orderLines= orderLineService.getListOrderLineInOrder(orderId);
-                for(OrderLine orderLine: orderLines){
-                    orderLineService.remove(orderLine);
-                }
+//                List<OrderLine> orderLines= orderLineService.getListOrderLineInOrder(orderId);
+//                for(OrderLine orderLine: orderLines){
+//                    orderLineService.remove(orderLine);
+//                }
+                order.setStatus(InputParam.CANCEL);
+                orderService.save(order);
                 return new ResponseEntity("Success", HttpStatus.OK);
             }
             catch (Exception e){

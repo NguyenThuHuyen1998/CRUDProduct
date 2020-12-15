@@ -22,7 +22,6 @@ public class Cart implements Serializable {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
     private User user;
 
 //    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cart")

@@ -2,15 +2,10 @@ package com.example.crud.service.impl;
 
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Order;
-import com.example.crud.entity.OrderLine;
-import com.example.crud.entity.Product;
-import com.example.crud.form.OrderForm;
-import com.example.crud.form.OrderLineForm;
 import com.example.crud.predicate.PredicateOrderFilter;
 import com.example.crud.repository.OrderLineRepository;
 import com.example.crud.repository.OrderRepository;
 import com.example.crud.service.OrderService;
-import org.apache.commons.collections4.ListUtils;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -20,10 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.stream.Collectors;
-
 /*
     created by HuyenNgTn on 15/11/2020
 */
@@ -32,12 +23,10 @@ public class OrderServiceImpl implements OrderService {
     public static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private OrderRepository orderRepository;
-    private OrderLineRepository orderLineRepository;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, OrderLineRepository orderLineRepository){
+    public OrderServiceImpl(OrderRepository orderRepository){
         this.orderRepository= orderRepository;
-        this.orderLineRepository= orderLineRepository;
     }
 
     @Override

@@ -1,17 +1,11 @@
 package com.example.crud.entity;
 
-import com.example.crud.service.FeedbackService;
-import com.example.crud.service.impl.FeedbackServiceImpl;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.example.crud.response.ProductResponse;
 
 import javax.persistence.*;
+import java.io.File;
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Entity
 @Table(name = "tblPRODUCTS")
@@ -58,6 +52,11 @@ public class Product implements Serializable {
         this.preview= preview;
         this.dateAdd= dateAdd;
         this.image= image;
+    }
+
+    public Product(ProductResponse productResponse){
+//        this.category= productForm.getCategoryId();
+
     }
 
     public static long getSerialVersionUID() {
@@ -130,7 +129,7 @@ public class Product implements Serializable {
     }
 
     public String getImage() {
-        return image;
+        return new File(image).getAbsolutePath();
     }
 
     public void setImage(String image) {

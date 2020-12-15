@@ -1,20 +1,20 @@
-package com.example.crud.form;
+package com.example.crud.response;
 
 import com.example.crud.entity.Cart;
-import com.example.crud.entity.CartItem;
+import com.example.crud.response.CartItemResponse;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class CartForm implements Serializable {
+public class CartResponse implements Serializable {
     private long cartId;
-    private List<CartItemForm> cartItemForms;
+    private List<CartItemResponse> cartItemResponses;
     private double totalMoney;
     private long userId;
 
-    public CartForm(Cart cart, List<CartItemForm> cartItemForms){
+    public CartResponse(Cart cart, List<CartItemResponse> cartItemResponses){
         this.cartId= cart.getCartId();
-        this.cartItemForms= cartItemForms;
+        this.cartItemResponses = cartItemResponses;
         this.totalMoney= cart.getTotalMoney();
         this.userId= cart.getUser().getUserId();
     }
@@ -26,12 +26,12 @@ public class CartForm implements Serializable {
         this.cartId = cartId;
     }
 
-    public List<CartItemForm> getCartItemForms() {
-        return cartItemForms;
+    public List<CartItemResponse> getCartItemForms() {
+        return cartItemResponses;
     }
 
-    public void setCartItems(List<CartItemForm> cartItemForms) {
-        this.cartItemForms = cartItemForms;
+    public void setCartItems(List<CartItemResponse> cartItemResponses) {
+        this.cartItemResponses = cartItemResponses;
     }
 
     public double getTotalMoney() {

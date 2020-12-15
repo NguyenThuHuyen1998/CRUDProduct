@@ -4,7 +4,6 @@ import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Cart;
 import com.example.crud.entity.CartItem;
 import com.example.crud.entity.Product;
-import com.example.crud.entity.User;
 import com.example.crud.service.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class CartItemController {
@@ -23,14 +21,12 @@ public class CartItemController {
     public static final Logger logger = LoggerFactory.getLogger(CartItemController.class);
 
     private CartItemService cartItemService;
-    private UserService userService;
     private ProductService productService;
     private CartService cartService;
     private JwtService jwtService;
 
-    public CartItemController(CartItemService cartItemService, UserService userService, ProductService productService, CartService cartService, JwtService jwtService){
+    public CartItemController(CartItemService cartItemService, ProductService productService, CartService cartService, JwtService jwtService){
         this.cartItemService= cartItemService;
-        this.userService= userService;
         this.productService= productService;
         this.cartService= cartService;
         this.jwtService= jwtService;
@@ -38,7 +34,7 @@ public class CartItemController {
 
     //thêm sản phâm vào giỏ hàng
     @PostMapping("/userPage/cartItems/{product-id}")
-    public ResponseEntity<CartItem> addProduct(@PathVariable(name = "product-id") long productId,
+    public ResponseEntity addProduct(@PathVariable(name = "product-id") long productId,
                                                HttpServletRequest request){
         try{
             if(jwtService.isCustomer(request)){
@@ -100,7 +96,7 @@ public class CartItemController {
                 cartItemService.save(cartItem);
                 return new ResponseEntity<>(cartItem, HttpStatus.OK);
             }
-            return new ResponseEntity("Login before processing", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED);
         }
         catch (Exception e){
             logger.error(String.valueOf(e));
@@ -128,7 +124,7 @@ public class CartItemController {
                 }
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity("Login before processing", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED);
         }
         catch (Exception e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -143,21 +139,26 @@ public class CartItemController {
             cartItemService.deleteAllCartItem(userId);
             return new ResponseEntity<>(HttpStatus.OK);
         }
-        return new ResponseEntity("Login before processing", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    @GetMapping(value = "/userPage/cartItems/{id}")
-    public ResponseEntity<CartItem> getACartItem(@PathVariable(name = "id") long id){
-        try{
-            CartItem cartItem= cartItemService.getCartItem(id);
-            if(cartItem!= null){
-                return new ResponseEntity(cartItem, HttpStatus.OK);
+    @GetMapping(value = "/userPage/cartItems/{cart-item-id}")
+    public ResponseEntity<CartItem> getACartItem(@PathVariable(name = "cart-item-id") long cartItemId,
+                                                 HttpServletRequest request){
+        if(jwtService.isCustomer(request)){
+            try{
+                CartItem cartItem= cartItemService.getCartItem(cartItemId);
+                if(jwtService.getCurrentUser(request).getUserId()!= cartItem.getCart().getUser().getUserId())
+                if(cartItem!= null){
+                    return new ResponseEntity(cartItem, HttpStatus.OK);
+                }
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            catch (Exception e){
+                logger.error(String.valueOf(e));
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
         }
-        catch (Exception e){
-            logger.error(String.valueOf(e));
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

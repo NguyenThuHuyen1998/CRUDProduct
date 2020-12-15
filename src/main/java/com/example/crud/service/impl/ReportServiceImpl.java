@@ -3,7 +3,7 @@ package com.example.crud.service.impl;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Order;
 import com.example.crud.entity.OrderLine;
-import com.example.crud.form.ReportProduct;
+import com.example.crud.response.ReportProductResponse;
 import com.example.crud.predicate.PredicateOrderFilter;
 import com.example.crud.repository.OrderLineRepository;
 import com.example.crud.repository.OrderRepository;
@@ -51,12 +51,12 @@ public class ReportServiceImpl implements ReportService {
                     for (OrderLine orderLine: orderLines){
                         long productId= orderLine.getProduct().getId();
                         if(reportProduct.containsKey(productId)){
-                            ReportProduct report= (ReportProduct) reportProduct.get(productId);
+                            ReportProductResponse report= (ReportProductResponse) reportProduct.get(productId);
                             report.setQuantity(report.getQuantity()+ orderLine.getAmount());
                             report.setRevenue(report.getRevenue()+ orderLine.getValueLine());
                         }
                         else {
-                            ReportProduct report= new ReportProduct(orderLine.getProduct().getName(), orderLine.getAmount(), orderLine.getValueLine());
+                            ReportProductResponse report= new ReportProductResponse(orderLine.getProduct().getName(), orderLine.getAmount(), orderLine.getValueLine());
                             reportProduct.put(productId, report);
                         }
                     }

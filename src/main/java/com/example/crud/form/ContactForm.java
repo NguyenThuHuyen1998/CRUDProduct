@@ -1,7 +1,5 @@
 package com.example.crud.form;
 
-import javax.persistence.Entity;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 public class ContactForm {
