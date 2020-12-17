@@ -9,7 +9,8 @@ import java.sql.Timestamp;
 
 @Entity
 @Table(name = "tblPRODUCTS")
-public class Product implements Serializable {
+public class
+Product implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -39,6 +40,9 @@ public class Product implements Serializable {
 
     @Column(name = "image")
     private String image;
+
+    @Column(name = "active")
+    private boolean active;
 
     public Product() {
     }
@@ -136,4 +140,11 @@ public class Product implements Serializable {
         this.image = image;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 }

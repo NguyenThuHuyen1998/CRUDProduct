@@ -72,11 +72,7 @@ public class ProductController {
             List<Product> totalProduct= productService.findAllProduct();
             if (output == null || output.size() == 0) {
             }
-            JSONObject jsonObject= new JSONObject();
-            Map<String, Object> map= new HashMap<>();
-            ObjectImpl object= new ObjectImpl();
             int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
-            jsonObject.put(InputParam.PAGING, object.getPagingJSONObject(totalProduct.size(), limit, totalPage, page));
             int total_count=totalProduct.size();
             int recordInPage=limit;
             int currentPage=page;
@@ -98,6 +94,9 @@ public class ProductController {
     public ResponseEntity<Product> getAProduct(@PathVariable("id") long productId) {
         try{
             Product currentProduct = productService.findById(productId);
+            if(!currentProduct.isActive()) {
+                return new ResponseEntity("Product stopped selling", HttpStatus.BAD_REQUEST);
+            }
             return new ResponseEntity(currentProduct, HttpStatus.OK);
         }
         catch (Exception e){
@@ -105,23 +104,6 @@ public class ProductController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-    }
-
-    @CrossOrigin
-    @GetMapping(value = "products/sort")
-    public ResponseEntity<Product> findProductByKeyword(@RequestParam(value = "sortBy", required = false, defaultValue = "") String sortBy,
-                                                        @RequestParam(value = "limit", required = false, defaultValue = "15") int limit) {
-        List<Product> productList = productService.filterByDateAdd(limit, sortBy);
-        if (productList != null && productList.size() > 0) {
-            return new ResponseEntity(productList, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @GetMapping(value = "/image")
-    public  String getImage() throws  IOException {
-            File serverFile = new File("/home/tupva/Downloads/CRUDProduct/src/main/java/com/example/crud/image/1.png");
-        return  serverFile.toPath().toString();
     }
 
     //---------------------------------------ADMIN--------------------------------------------------
@@ -148,6 +130,7 @@ public class ProductController {
                 product.setDescription(description);
                 product.setPreview(preview);
                 product.setPrice(price);
+                product.setActive(true);
                 storageService.save(image);
                 product.setImage(fileDir+ image.getOriginalFilename());
                 productService.save(product);
@@ -167,6 +150,9 @@ public class ProductController {
         if(jwtService.isAdmin(request)){
             try{
                 Product currentProduct= productService.findById(productId);
+                if(!currentProduct.isActive()){
+                    return new ResponseEntity("Product stopped selling!!!", HttpStatus.BAD_REQUEST);
+                }
                 if(product.getId()== 0 || productId!= product.getId()){
                     return new ResponseEntity("Input wrong!", HttpStatus.BAD_REQUEST);
                 }
@@ -184,12 +170,13 @@ public class ProductController {
     // xóa 1 sản phẩm
     @CrossOrigin
     @DeleteMapping(value = "/adminPage/products/{id}")
-    public ResponseEntity<Product> deleteProduct(@PathVariable("id") long productId,
+    public ResponseEntity<Product> stopSelling(@PathVariable("id") long productId,
                                                  HttpServletRequest request) {
         if(jwtService.isAdmin(request)){
             try{
                 Product product = productService.findById(productId);
-                productService.remove(product);
+                product.setActive(false);
+                productService.save(product);
                 return new ResponseEntity("Success", HttpStatus.OK);
             }
             catch (Exception e){

@@ -87,6 +87,15 @@ public class PredicateProductFilter {
         };
     }
 
+    public Predicate<Product> checkActive(){
+        return (product) ->{
+            if(product.isActive()){
+                return true;
+            }
+            return false;
+        };
+    }
+
     public Predicate<Product> checkCategory(long categoryId){
         return product -> {
             if(categoryId==0){

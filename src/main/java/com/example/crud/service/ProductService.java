@@ -10,11 +10,8 @@ public interface ProductService {
     List<Product> findAllProduct();
     Product findById(Long productId);
     List<Product> findByCategoryID(Long categoryId);
-//    List<Product> findProductByPrice(double priceMin, double priceMax);
     List<Product> filterProduct(Map<String, Object> input);
-    List<Product> filterByKeyword(String keyword);
     void save (Product product);
     void remove (Product product);
-    Product update(Product product);
-    List<Product> filterByDateAdd(int limit, String sortBy);
+    Product update (Product product);
 }
