@@ -1,4 +1,4 @@
-package com.example.crud.form;
+package com.example.crud.input;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

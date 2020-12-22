@@ -1,6 +1,5 @@
 package com.example.crud.service.impl;
 
-import com.example.crud.controller.OrderController;
 import com.example.crud.service.SendEmailService;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
@@ -58,6 +57,12 @@ public class SendEmailServiceImpl implements SendEmailService {
     @Override
     public boolean notifyOrder(String message, String emailCustomer) {
         String subject= "Đơn đang vận chuyển";
+        return sendMail(subject, message, emailAdmin, passEmailAdmin, emailCustomer);
+    }
+
+    @Override
+    public boolean resetPassword(String message, String emailCustomer) {
+        String subject= "Cấp lại mật khẩu";
         return sendMail(subject, message, emailAdmin, passEmailAdmin, emailCustomer);
     }
 

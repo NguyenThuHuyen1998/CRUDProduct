@@ -1,4 +1,4 @@
-package com.example.crud.form;
+package com.example.crud.input;
 
 import javax.validation.constraints.NotNull;
 

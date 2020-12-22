@@ -1,16 +1,10 @@
 package com.example.crud.response;
 
 import com.example.crud.entity.Order;
-import com.example.crud.entity.OrderLine;
-import com.example.crud.entity.User;
-import com.example.crud.form.OrderLineForm;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.example.crud.output.OrderLineForm;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /*
     created by HuyenNgTn on 03/12/2020

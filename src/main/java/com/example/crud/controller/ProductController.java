@@ -3,14 +3,10 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Category;
 import com.example.crud.entity.Product;
-import com.example.crud.response.ResponseMessage;
 import com.example.crud.service.CategoryService;
 import com.example.crud.service.FilesStorageService;
 import com.example.crud.service.JwtService;
 import com.example.crud.service.ProductService;
-import com.example.crud.service.impl.ObjectImpl;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +15,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 @RestController
 public class ProductController {
     public static final Logger logger = LoggerFactory.getLogger(ProductController.class);
-    private ProductService productService;
-    private CategoryService categoryService;
-    private JwtService jwtService;
-    private FilesStorageService storageService;
+    private final ProductService productService;
+    private final CategoryService categoryService;
+    private final JwtService jwtService;
+    private final FilesStorageService storageService;
 
     @Value("${file.upload-dir}")
     private String fileDir;
@@ -49,7 +42,7 @@ public class ProductController {
     @CrossOrigin
     @ResponseBody
     @GetMapping(value = "/products")
-    public ResponseEntity getAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
+    public ResponseEntity<Product> getAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMin,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMax,
                                          @RequestParam(required = false, defaultValue = "-1") long timeStart,
@@ -65,21 +58,16 @@ public class ProductController {
             input.put(InputParam.TIME_START, timeStart);
             input.put(InputParam.TIME_END, timeEnd);
             input.put(InputParam.CATEGORY_ID, categoryId);
-            input.put(InputParam.SORT_BY, sortBy);;
-            List<Product> output = new ArrayList<>();
-            output= productService.filterProduct(input);
+            input.put(InputParam.SORT_BY, sortBy);
+            List<Product> output = productService.filterProduct(input);
 
             List<Product> totalProduct= productService.findAllProduct();
-            if (output == null || output.size() == 0) {
-            }
             int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
             int total_count=totalProduct.size();
-            int recordInPage=limit;
-            int currentPage=page;
             Map<String, Object> paging= new HashMap<>();
-            paging.put(InputParam.RECORD_IN_PAGE, recordInPage);
+            paging.put(InputParam.RECORD_IN_PAGE, limit);
             paging.put(InputParam.TOTAL_COUNT, total_count);
-            paging.put(InputParam.CURRENT_PAGE, currentPage);
+            paging.put(InputParam.CURRENT_PAGE, page);
             paging.put(InputParam.TOTAL_PAGE, totalPage);
             Map<String, Object> result= new HashMap<>();
             result.put(InputParam.PAGING, paging);

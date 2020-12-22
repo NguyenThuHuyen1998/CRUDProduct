@@ -62,7 +62,7 @@ public class CartItemController {
                 cartService.save(cart);
                 return new ResponseEntity(cartItemTarget, HttpStatus.OK);
             }
-            return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+            return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
         }
         catch(Exception e){
             logger.error(String.valueOf(e));
@@ -96,7 +96,7 @@ public class CartItemController {
                 cartItemService.save(cartItem);
                 return new ResponseEntity<>(cartItem, HttpStatus.OK);
             }
-            return new ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED);
+            return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
         }
         catch (Exception e){
             logger.error(String.valueOf(e));
@@ -124,7 +124,7 @@ public class CartItemController {
                 }
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED);
+            return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
         }
         catch (Exception e){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -139,7 +139,7 @@ public class CartItemController {
             cartItemService.deleteAllCartItem(userId);
             return new ResponseEntity<>(HttpStatus.OK);
         }
-        return new ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @GetMapping(value = "/userPage/cartItems/{cart-item-id}")
@@ -159,6 +159,6 @@ public class CartItemController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        return new ResponseEntity(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

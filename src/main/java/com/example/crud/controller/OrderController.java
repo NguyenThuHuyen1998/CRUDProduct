@@ -3,9 +3,8 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.*;
 import com.example.crud.response.OrderResponse;
-import com.example.crud.form.OrderLineForm;
+import com.example.crud.output.OrderLineForm;
 import com.example.crud.service.*;
-import org.apache.commons.lang3.time.CalendarUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +79,7 @@ public class OrderController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
 
     }
 
@@ -135,7 +134,7 @@ public class OrderController {
             result.put(InputParam.PAGING, paging);
             return new ResponseEntity(result, HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     //Xóa 1 đơn hàng
@@ -204,7 +203,7 @@ public class OrderController {
                 Order order= orderService.findById(orderId);
                 User user= order.getUser();
                 if(userId != user.getUserId() || !order.getStatus().equals(InputParam.SHIPPING)){
-                    return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+                    return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
                 }
                 order.setStatus(InputParam.FINISHED);
                 orderService.save(order);
@@ -269,7 +268,7 @@ public class OrderController {
             }
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You aren't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @GetMapping(value = "/adminPage/order/{order-id}")
@@ -314,7 +313,7 @@ public class OrderController {
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
                 else {
-                    return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+                    return new ResponseEntity("You cannot perform this action", HttpStatus.METHOD_NOT_ALLOWED);
                 }
             }
             catch (Exception e){
@@ -333,7 +332,7 @@ public class OrderController {
             try{
                 Order order= orderService.findById(orderId);
                 if (!order.getStatus().equals(InputParam.PROCESSING)) {
-                    return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+                    return new ResponseEntity("You cannot perform this action", HttpStatus.METHOD_NOT_ALLOWED);
                 }
 //                List<OrderLine> orderLines= orderLineService.getListOrderLineInOrder(orderId);
 //                for(OrderLine orderLine: orderLines){

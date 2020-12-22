@@ -25,7 +25,7 @@ public class News implements Serializable {
     private long datePost;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cate_id", nullable = false)
+    @JoinColumn(name = "author_id", nullable = false)
     private User user;
 
     public News(){

@@ -59,7 +59,7 @@ public class CartController {
                 CartResponse cartResponse = new CartResponse(cart, cartItemResponses);
                 return new ResponseEntity(cartResponse, HttpStatus.OK);
             }
-            return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+            return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
         }
         catch (Exception e){
             logger.error(String.valueOf(e));

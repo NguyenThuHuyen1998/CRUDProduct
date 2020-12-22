@@ -5,11 +5,13 @@ package com.example.crud.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.aspectj.weaver.ast.Or;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,20 +31,21 @@ public class User implements Serializable {
     @Column(name = "user_id")
     private long userId;
 
-    @NotNull
     @Column(name = "user_name", unique = true)
+    @NotEmpty(message = "*Please provide your username")
     private String userName;
 
-    @NotNull
     @Column(name = "full_name")
+    @NotEmpty(message = "*Please provide your full name")
     private String fullName;
 
-    @NotNull
+    @Length(min=5, message = "Your password must have at least 5 character")
+    @NotEmpty(message = "*Please provide your password")
     @Column(name = "pass_word")
     protected String password;
 
-    @Email
-    @NotNull
+    @Email(message = "*Please provide a valid email")
+    @NotEmpty(message = "Please provide an email")
     @Column(name = "email")
     private String email;
 
@@ -57,16 +60,6 @@ public class User implements Serializable {
 
     @Column(name ="last_active", nullable = false)
     private long lastActive;
-//
-//    @Column(name = "enable", nullable = false)
-//    private boolean enable;
-
-//    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-//    @JoinColumn(name = "cartId")
-//    private Cart cart;
-
-    public User(User user) {
-    }
 
     public User(){
 

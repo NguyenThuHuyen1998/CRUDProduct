@@ -1,12 +1,8 @@
 package com.example.crud.controller;
 
-import com.example.crud.form.ContactForm;
+import com.example.crud.input.ContactForm;
 import com.example.crud.service.SendEmailService;
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,16 +1,15 @@
 package com.example.crud.controller;
 
 import com.example.crud.entity.Order;
-import com.example.crud.form.ChangePasswordForm;
+import com.example.crud.input.ChangePasswordForm;
+import com.example.crud.input.UserForm;
 import com.example.crud.predicate.PredicateOrderFilter;
 import com.example.crud.service.OrderService;
+import com.example.crud.service.SendEmailService;
 import com.example.crud.service.impl.JwtServiceImpl;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.User;
-import com.example.crud.jwt.JwtTokenProvider;
-import com.example.crud.service.CartService;
 import com.example.crud.service.UserService;
-import netscape.javascript.JSObject;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -24,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.function.Predicate;
@@ -39,40 +39,64 @@ public class UserController {
     private JwtServiceImpl jwtHandler;
     private UserService userService;
     private OrderService orderService;
-    private static PasswordEncoder passwordEncoder;
+    private SendEmailService sendEmailService;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     AuthenticationManager authenticationManager;
 
     @Autowired
-    public UserController(UserService userService, OrderService orderService, JwtServiceImpl jwtHandler, PasswordEncoder passwordEncoder) {
+    public UserController(UserService userService, OrderService orderService, JwtServiceImpl jwtHandler, SendEmailService service, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.orderService = orderService;
         this.jwtHandler = jwtHandler;
-        this.passwordEncoder= passwordEncoder;
+        this.sendEmailService= service;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // xem thông tin cá nhân user
     @RequestMapping(value = "/userPage/users", method = RequestMethod.GET)
     public ResponseEntity<Object> getDetailUser(HttpServletRequest request) {
         if (jwtHandler.isUser(request)) {
-            long userId= jwtHandler.getCurrentUser(request).getUserId();
+            long userId = jwtHandler.getCurrentUser(request).getUserId();
             User user = userService.findById(userId);
             return new ResponseEntity<Object>(user, HttpStatus.OK);
         }
         return new ResponseEntity<>("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
+    @PutMapping(value = "/userPage/users")
+    public ResponseEntity<User> editUser(@Valid @RequestBody UserForm userForm,
+                                         HttpServletRequest request) {
+        if (jwtHandler.isUser(request)) {
+            try {
+                User user = jwtHandler.getCurrentUser(request);
+                if (user.getUserId() != userForm.getUserId()) {
+                    return new ResponseEntity("You cannot perform this action", HttpStatus.METHOD_NOT_ALLOWED);
+                }
+                user.setEmail(userForm.getEmail());
+                user.setPhone(userForm.getPhone());
+                user.setAddress(userForm.getAddress());
+                user.setFullName(userForm.getFullName());
+                userService.add(user);
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
+    }
 
     //Thay đổi mật khẩu người dùng
     @PutMapping(value = "/user/changePassword")
     public ResponseEntity<User> changePassword(@RequestBody ChangePasswordForm data, HttpServletRequest request) {
-        if(jwtHandler.isUser(request)){
+        if (jwtHandler.isUser(request)) {
             try {
                 long userId = jwtHandler.getCurrentUser(request).getUserId();
                 User user = userService.findById(userId);
-                passwordEncoder= new BCryptPasswordEncoder();
-                if(passwordEncoder.matches(data.getOldPass(), user.getPassword()) && data.validatePassword()){
+                passwordEncoder = new BCryptPasswordEncoder();
+                if (passwordEncoder.matches(data.getOldPass(), user.getPassword()) && data.validatePassword()) {
                     user.setPassword(passwordEncoder.encode(data.getNewPass()));
                     userService.add(user);
                     return new ResponseEntity("Success", HttpStatus.OK);
@@ -87,21 +111,30 @@ public class UserController {
 
 
     @PostMapping(value = "/user/forgetPassword")
-    public ResponseEntity<User> forgetPassword(@RequestBody String data){
-        JSONObject jsonObject= new JSONObject(data);
-        String userName= jsonObject.getString("userName");
-        try{
-            User user= userService.findByName(userName);
-            int randomStrLength= 10;
-            char[] possibleCharacters = (new String("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~`!@#$%^&*()-_=+[{]}\\|;:\'\",<.>/?")).toCharArray();
-            String randomStr = RandomStringUtils.random( randomStrLength, 0, possibleCharacters.length-1, false, false, possibleCharacters, new SecureRandom() );
-            user.setPassword(randomStr);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
-        catch (Exception e){
+    public ResponseEntity<User> forgetPassword(@RequestBody String data) {
+        JSONObject jsonObject = new JSONObject(data);
+        String userName = jsonObject.getString("userName");
+//        try{
+        User user = userService.findByName(userName);
+        if (user == null) {
             return new ResponseEntity("Username is not exist", HttpStatus.BAD_REQUEST);
         }
+        int randomStrLength = 10;
+        char[] possibleCharacters = (new String("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")).toCharArray();
+        String randomStr = RandomStringUtils.random(randomStrLength, 0, possibleCharacters.length - 1, false, false, possibleCharacters, new SecureRandom());
+        user.setPassword(passwordEncoder.encode(randomStr));
+        userService.add(user);
+        String message = "Mật khẩu mới của bạn là: " + randomStr + ". Vui lòng đổi mật khẩu mới sau khi đăng nhập.";
+        if (!sendEmailService.resetPassword(message, user.getEmail())) {
+            return new ResponseEntity("Can't send reset password for you", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
+//        catch (Exception e){
+//            return new ResponseEntity("Username is not exist", HttpStatus.BAD_REQUEST);
+//        }
+
+//}
 
     //-------------------------------------------ADMIN---------------------------------------------
     //xem danh sách user hiện có và trạng thái hoạt động
@@ -115,7 +148,7 @@ public class UserController {
             }
             return new ResponseEntity(userList, HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @DeleteMapping(value = "/adminPage/users/{id}")
@@ -135,7 +168,7 @@ public class UserController {
             userService.delete(user);
             return new ResponseEntity("Success", HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     /* ---------------- không xóa user, chỉ vô hiệu hóa ------------------------ ADMIN*/
@@ -164,7 +197,7 @@ public class UserController {
                 return new ResponseEntity(user, HttpStatus.OK);
             }
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 }
 

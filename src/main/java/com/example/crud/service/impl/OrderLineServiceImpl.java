@@ -1,8 +1,7 @@
 package com.example.crud.service.impl;
 
-import com.example.crud.entity.Order;
 import com.example.crud.entity.OrderLine;
-import com.example.crud.form.OrderLineForm;
+import com.example.crud.output.OrderLineForm;
 import com.example.crud.repository.OrderLineRepository;
 import com.example.crud.service.OrderLineService;
 import org.slf4j.Logger;
@@ -12,9 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /*
     created by HuyenNgTn on 18/11/2020

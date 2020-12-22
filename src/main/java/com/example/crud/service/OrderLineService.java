@@ -1,7 +1,7 @@
 package com.example.crud.service;
 
 import com.example.crud.entity.OrderLine;
-import com.example.crud.form.OrderLineForm;
+import com.example.crud.output.OrderLineForm;
 
 import java.util.List;
 

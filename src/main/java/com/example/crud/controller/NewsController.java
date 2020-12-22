@@ -56,7 +56,7 @@ public class NewsController {
             newsService.saveNews(news);
             return new ResponseEntity<>(news, HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You aren't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @PutMapping(value = "/news/{id}")
@@ -73,7 +73,7 @@ public class NewsController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You aren't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @DeleteMapping(value = "/news/{id}")
@@ -90,6 +90,6 @@ public class NewsController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
+        return new ResponseEntity("You aren't admin", HttpStatus.METHOD_NOT_ALLOWED);
     }
 }

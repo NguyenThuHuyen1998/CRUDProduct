@@ -62,5 +62,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.and()
 				.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
 				.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint);
+		http.logout().logoutSuccessUrl("/login").logoutUrl("/logout").permitAll();
 	}
 }

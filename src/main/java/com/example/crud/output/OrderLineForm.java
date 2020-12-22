@@ -1,4 +1,4 @@
-package com.example.crud.form;
+package com.example.crud.output;
 
 import com.example.crud.entity.OrderLine;
 import org.slf4j.Logger;
