@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import org.apache.commons.collections4.ListUtils;
 
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -54,27 +55,27 @@ public class ProductServiceImpl implements ProductService {
         productRepository.delete(product);
     }
 
-    @Override
-    public Product update(Product product) {
-        long productId= product.getId();
-        Product oldProduct= findById(productId);
-        oldProduct.setCategory(product.getCategory()== null? oldProduct.getCategory() : product.getCategory());
-        oldProduct.setName(product.getName()== null? oldProduct.getName() : product.getName());
-        oldProduct.setDescription(product.getDescription()== null? oldProduct.getDescription() : product.getDescription());
-        oldProduct.setPrice(product.getPrice()== 0? oldProduct.getPrice(): product.getPrice());
-        oldProduct.setImage(product.getImage()== null? oldProduct.getImage(): product.getImage());
-        oldProduct.setPreview(product.getPreview()== null? oldProduct.getPreview(): product.getPreview());
-        oldProduct.setDateAdd(new Date().getTime());
-        save(oldProduct);
-        return oldProduct;
-    }
+//    @Override
+//    public Product update(Product product) {
+//        long productId= product.getId();
+//        Product oldProduct= findById(productId);
+//        oldProduct.setCategory(product.getCategory()== null? oldProduct.getCategory() : product.getCategory());
+//        oldProduct.setName(product.getName()== null? oldProduct.getName() : product.getName());
+//        oldProduct.setDescription(product.getDescription()== null? oldProduct.getDescription() : product.getDescription());
+//        oldProduct.setPrice(product.getPrice()== 0? oldProduct.getPrice(): product.getPrice());
+//        oldProduct.setImage(product.getImage()== null? oldProduct.getImage(): product.getImage());
+//        oldProduct.setPreview(product.getPreview()== null? oldProduct.getPreview(): product.getPreview());
+//        oldProduct.setDateAdd(oldProduct.getDate());
+//        save(oldProduct);
+//        return oldProduct;
+//    }
 
     @Override
-    public List<Product> filterProduct(Map<String, Object> filter){
+    public List<Product> filterProduct(Map<String, Object> filter) throws ParseException {
         double priceMin= (double) filter.get(InputParam.PRICE_MIN);
         double priceMax= (double) filter.get(InputParam.PRICE_MAX);
-        long timeStart= (long) filter.get(InputParam.TIME_START);
-        long timeEnd= (long) filter.get(InputParam.TIME_END);
+        String timeStart= (String) filter.get(InputParam.TIME_START);
+        String timeEnd= (String) filter.get(InputParam.TIME_END);
         long categoryId= (long) filter.get(InputParam.CATEGORY_ID);
         String keyword= (String) filter.get(InputParam.KEY_WORD);
         String sortBy= (String) filter.get(InputParam.SORT_BY);

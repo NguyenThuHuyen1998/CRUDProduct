@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -34,12 +35,13 @@ public class OrderController {
     private JwtService jwtService;
 
     @Autowired
-    public OrderController(OrderService orderService, CartService cartService, CartItemService cartItemService, UserService userService, OrderLineService orderLineService, JwtService jwtService) {
+    public OrderController(OrderService orderService, CartService cartService, CartItemService cartItemService, UserService userService, SendEmailService service, OrderLineService orderLineService, JwtService jwtService) {
         this.orderService = orderService;
         this.cartService = cartService;
         this.cartItemService = cartItemService;
         this.userService = userService;
         this.orderLineService = orderLineService;
+        this.emailService= service;
         this.jwtService = jwtService;
     }
 
@@ -62,10 +64,10 @@ public class OrderController {
                     for (CartItem cartItem : cartItemList) {
                         OrderLine orderLine = new OrderLine(cartItem, order);
                         orderLineService.save(orderLine);
-                        cart.setTotalMoney(0);
-                        cartService.save(cart);
                         cartItemService.deleteCartItem(cartItem);
                     }
+                    cart.setTotalMoney(0);
+                    cartService.save(cart);
                     //set lại thời gian hoạt động cuối cùng để sau có thể xóa cart của user nếu đã 3 tháng không hoạt động
                     user.setLastActive(new Date().getTime());
                     userService.add(user);
@@ -86,7 +88,7 @@ public class OrderController {
     //lấy danh sách đơn hàng của 1 user
     //user chỉ được lấy ds đơn hàng của mình nên bắt buộc có user-id
     @GetMapping(value = "/userPage/orders")
-    public ResponseEntity<OrderResponse> getlistOrder(@RequestParam(name = "status", required = true, defaultValue = InputParam.PROCESSING) String status,
+    public ResponseEntity<OrderResponse> getlistOrder(@RequestParam(name = "status", required = false, defaultValue = "") String status,
                                                       @RequestParam(name = "dateStart", required = false, defaultValue = "-1") String dateStart,
                                                       @RequestParam(name = "dateEnd", required = false, defaultValue = "-1") String dateEnd,
                                                       @RequestParam(name = "priceMin", required = false, defaultValue = "-1") double priceMin,
@@ -94,7 +96,7 @@ public class OrderController {
                                                       @RequestParam(name = "sortBy", required = false, defaultValue = InputParam.DECREASE) String sortBy,
                                                       @RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
                                                       @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                                      HttpServletRequest request) {
+                                                      HttpServletRequest request) throws ParseException {
         if(jwtService.isCustomer(request)){
 
             long userId= jwtService.getCurrentUser(request).getUserId();
@@ -124,12 +126,10 @@ public class OrderController {
             }
             Map<String, Object> paging= new HashMap<>();
             int totalPage = (orderTotal.size()) / limit + ((orderTotal.size() % limit == 0) ? 0 : 1);
-            int recordInPage=limit;
-            int currentPage=page;
             int totalCount=orderTotal.size();
-            paging.put(InputParam.RECORD_IN_PAGE, recordInPage);
+            paging.put(InputParam.RECORD_IN_PAGE, limit);
             paging.put(InputParam.TOTAL_COUNT, totalCount);
-            paging.put(InputParam.CURRENT_PAGE, currentPage);
+            paging.put(InputParam.CURRENT_PAGE, page);
             paging.put(InputParam.TOTAL_PAGE, totalPage);
             result.put(InputParam.PAGING, paging);
             return new ResponseEntity(result, HttpStatus.OK);
@@ -220,7 +220,7 @@ public class OrderController {
 
     //admin lấy danh sách đơn đặt hàng của khách, lọc theo user-id, productId, status, time, giá trị đơn
     @GetMapping(value = "/adminPage/orders")
-    public ResponseEntity<OrderResponse> getlistOrderByAdmin(@RequestParam(name = "status", required = true, defaultValue = InputParam.PROCESSING) String status,
+    public ResponseEntity<OrderResponse> getlistOrderByAdmin(@RequestParam(name = "status", required = true, defaultValue = "") String status,
                                                              @RequestParam(name = "dateStart", required = false, defaultValue = "-1") String dateStart,
                                                              @RequestParam(name = "dateEnd", required = false, defaultValue = "-1") String dateEnd,
                                                              @RequestParam(name = "priceMin", required = false, defaultValue = "-1") double priceMin,
@@ -229,7 +229,7 @@ public class OrderController {
                                                              @RequestParam(name = "sortBy", required = false, defaultValue = InputParam.DECREASE) String sortBy,
                                                              @RequestParam(name = "limit", required = false, defaultValue = "10") int limit,
                                                              @RequestParam(name = "page", required = false, defaultValue = "1") int page,
-                                                             HttpServletRequest request) {
+                                                             HttpServletRequest request) throws ParseException {
         if(jwtService.isAdmin(request)){
             Map<String, Object> filter= new HashMap<>();
             filter.put(InputParam.USER_ID, userId);
@@ -241,7 +241,7 @@ public class OrderController {
             filter.put(InputParam.PRICE_MAX, priceMax);
 
             List<Order> orderFilter = orderService.filterOrder(filter);
-            List<Order> orderTotal= orderService.getListOrderByUserId(userId);
+            List<Order> orderTotal= orderService.findAllOrder();
             List<OrderResponse> orderResponses = new ArrayList<>();
             Map<String, Object> result= new HashMap<>();
 
@@ -258,7 +258,7 @@ public class OrderController {
                 int totalPage = (orderTotal.size()) / limit + ((orderTotal.size() % limit == 0) ? 0 : 1);
                 int recordInPage=limit;
                 int currentPage=page;
-                int totalCount=orderTotal.size();
+                int totalCount=orderFilter.size();
                 paging.put(InputParam.RECORD_IN_PAGE, recordInPage);
                 paging.put(InputParam.TOTAL_COUNT, totalCount);
                 paging.put(InputParam.CURRENT_PAGE, currentPage);
@@ -306,9 +306,11 @@ public class OrderController {
                     orderService.save(order);
 
                     // send email notification
-                    DateFormat dateFormat = new SimpleDateFormat("dd/mm/yyyy");
-                    String date= dateFormat.format(DateUtils.addDays(new Date(), 7));
-                    String message= "Đơn hàng có mã "+ order.getOrderId()+ " của bạn đã được giao cho shipper. Đơn sẽ được giao muộn nhất vào ngày " + date+". Hãy để ý điện thoại.";
+                    Calendar calendar= Calendar.getInstance();
+                    calendar.add(Calendar.DAY_OF_YEAR, 1);
+                    Date date1= calendar.getTime();
+                    String dateStr= new SimpleDateFormat("dd/MM/yyyy").format(date1);
+                    String message= "Đơn hàng có mã "+ order.getOrderId()+ " của bạn đã được giao cho shipper. Đơn sẽ được giao muộn nhất vào ngày " + dateStr+". Hãy để ý điện thoại.";
                     emailService.notifyOrder(message, user.getEmail());
                     return new ResponseEntity<>(HttpStatus.OK);
                 }

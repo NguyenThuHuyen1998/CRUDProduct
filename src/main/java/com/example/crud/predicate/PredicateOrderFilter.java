@@ -4,6 +4,9 @@ import com.example.crud.entity.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
@@ -55,16 +58,18 @@ public class PredicateOrderFilter {
     }
 
 
-    public Predicate<Order> checkDate(String dateStart, String dateEnd){
+    public Predicate<Order> checkDate(String dateStart, String dateEnd) throws ParseException {
         long timeStart= -1;
         long timeEnd= -1;
         if(!dateEnd.equals("-1") && !dateStart.equals("-1")){
-            Date start= new Date(dateStart+" 00:00:00");
-            timeStart= start.getTime();
+            String start= dateStart+" 00:00:00";
+            DateFormat formatter=new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            timeStart=formatter.parse(start).getTime();
             System.out.println(timeStart);
-            Date end= new Date((timeEnd+" 23:59:59"));
-            timeEnd= end.getTime();
-            System.out.println(timeEnd);
+
+            String end= dateEnd+" 23:59:59";
+            timeEnd=formatter.parse(end).getTime();
+            System.out.println(timeStart);
         }
         long finalTimeStart = timeStart;
         long finalTimeEnd = timeEnd;

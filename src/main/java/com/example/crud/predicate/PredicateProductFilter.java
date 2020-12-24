@@ -1,9 +1,14 @@
 package com.example.crud.predicate;
 
+import com.example.crud.entity.Order;
 import com.example.crud.entity.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.function.Predicate;
 
 /*
@@ -22,23 +27,37 @@ public class PredicateProductFilter {
         return predicateFilter;
     }
 
-    public Predicate<Product> checkDateAdd(long timeStart, long timeEnd){
+    public Predicate<Product> checkDateAdd(String dateStart, String dateEnd) throws ParseException {
+        long timeStart= -1;
+        long timeEnd= -1;
+        if(!dateEnd.equals("-1") && !dateStart.equals("-1")){
+            String start= dateStart+" 00:00:00";
+            DateFormat formatter=new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            timeStart=formatter.parse(start).getTime();
+            System.out.println(timeStart);
+
+            String end= dateEnd+" 23:59:59";
+            timeEnd=formatter.parse(end).getTime();
+            System.out.println(timeEnd);
+        }
+        long finalTimeStart = timeStart;
+        long finalTimeEnd = timeEnd;
         return (product) ->{
             try{
-                if(timeStart== -1){
-                    if(timeEnd ==-1){
+                if(finalTimeStart == -1){
+                    if(finalTimeEnd ==-1){
                         return true;
                     }
-                    if(product.getDate() <= timeEnd){
-                        return true;
-                    }
-                }
-                else if(timeEnd== -1){
-                    if (product.getDate() >= timeStart){
+                    if(product.getDate() <= finalTimeEnd){
                         return true;
                     }
                 }
-                else if(product.getDate() >= timeStart && product.getDate() <= timeEnd){
+                else if(finalTimeEnd== -1){
+                    if (product.getDate() >= finalTimeStart){
+                        return true;
+                    }
+                }
+                else if(product.getDate() >= finalTimeStart && product.getDate() <= finalTimeEnd){
                     return true;
                 }
                 return false;
@@ -48,6 +67,7 @@ public class PredicateProductFilter {
                 return false;
             }
         };
+
     }
 
     public Predicate<Product> checkPrice(double minPrice, double maxPrice){
@@ -80,7 +100,7 @@ public class PredicateProductFilter {
 
     public Predicate<Product> checkKeyword(String keyword){
         return (product) ->{
-            if(product.getName().contains(keyword) || product.getDescription().contains(keyword)  || product.getPreview().contains(keyword)){
+            if(product.getName().toLowerCase().contains(keyword.toLowerCase()) || product.getDescription().toLowerCase().contains(keyword.toLowerCase())  || product.getPreview().toLowerCase().contains(keyword.toLowerCase())){
                 return true;
             }
             return false;
@@ -107,4 +127,5 @@ public class PredicateProductFilter {
             return false;
         };
     }
+
 }

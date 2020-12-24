@@ -7,6 +7,7 @@ import com.example.crud.repository.OrderLineRepository;
 import com.example.crud.repository.OrderRepository;
 import com.example.crud.service.OrderService;
 
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.Predicate;
 import org.slf4j.Logger;
@@ -98,7 +99,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> filterOrder(Map<String, Object> filter) {
+    public List<Order> filterOrder(Map<String, Object> filter) throws ParseException {
         long userId= (long) filter.get(InputParam.USER_ID);
         String status= (String) filter.get(InputParam.STATUS);
         String dateStart= (String) filter.get(InputParam.TIME_START);

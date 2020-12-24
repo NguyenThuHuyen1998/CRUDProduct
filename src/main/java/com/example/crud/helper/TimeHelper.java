@@ -26,7 +26,7 @@ public class TimeHelper {
     }
 
     public long convertTimestamp(String dateStr) throws ParseException {
-        SimpleDateFormat simpleDateFormat= new SimpleDateFormat("dd/mm/yyyy HH:mm:ss");
+        SimpleDateFormat simpleDateFormat= new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date= simpleDateFormat.parse(dateStr);
         return date.getTime();
     }
@@ -90,11 +90,11 @@ public class TimeHelper {
     public String getLastDayInMonth(){
         Calendar calendar= Calendar.getInstance();
         int lastDayOfMonth= calendar.getActualMaximum(Calendar.DATE);
-        int month= calendar.get(calendar.get(Calendar.MONTH))+ 1;
+        int month= calendar.get(Calendar.MONTH)+ 1;
         if(month<10){
-            return String.valueOf(lastDayOfMonth)+"/0"+String.valueOf(month)+ "/"+ String.valueOf(Calendar.YEAR);
+            return String.valueOf(lastDayOfMonth)+"/0"+String.valueOf(month)+ "/"+ String.valueOf(calendar.get(Calendar.YEAR));
         }
-        return String.valueOf(lastDayOfMonth)+"/"+ String.valueOf(month)+ "/"+ String.valueOf(Calendar.YEAR);
+        return String.valueOf(lastDayOfMonth)+"/"+ String.valueOf(month)+ "/"+ String.valueOf(calendar.get(Calendar.YEAR));
     }
 
     public String getFirstDayOfYear(){

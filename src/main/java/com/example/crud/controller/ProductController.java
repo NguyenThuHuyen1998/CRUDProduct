@@ -3,6 +3,7 @@ package com.example.crud.controller;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Category;
 import com.example.crud.entity.Product;
+import com.example.crud.helper.S3Utils;
 import com.example.crud.service.CategoryService;
 import com.example.crud.service.FilesStorageService;
 import com.example.crud.service.JwtService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
 import java.util.*;
 
 @RestController
@@ -25,7 +27,7 @@ public class ProductController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final JwtService jwtService;
-    private final FilesStorageService storageService;
+    private FilesStorageService filesStorageService;
 
     @Value("${file.upload-dir}")
     private String fileDir;
@@ -34,7 +36,7 @@ public class ProductController {
         this.productService = productService;
         this.categoryService = categoryService;
         this.jwtService= jwtService;
-        this.storageService= filesStorageService;
+        this.filesStorageService= filesStorageService;
     }
 
     //lấy danh sách tất cả sản phẩm dành cho user
@@ -45,12 +47,12 @@ public class ProductController {
     public ResponseEntity<Product> getAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMin,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMax,
-                                         @RequestParam(required = false, defaultValue = "-1") long timeStart,
-                                         @RequestParam(required = false, defaultValue = "-1") long timeEnd,
+                                         @RequestParam(required = false, defaultValue = "-1") String timeStart,
+                                         @RequestParam(required = false, defaultValue = "-1") String timeEnd,
                                          @RequestParam(required = false, defaultValue = "0") long categoryId,
                                          @RequestParam(required = false, defaultValue = "") String sortBy,
                                          @RequestParam(required = false, defaultValue = "9") int limit,
-                                         @RequestParam(required = false, defaultValue = "1") int page){
+                                         @RequestParam(required = false, defaultValue = "1") int page) throws ParseException {
             Map<String, Object> input = new HashMap<>();
             input.put(InputParam.KEY_WORD, keyword);
             input.put(InputParam.PRICE_MAX, priceMax);
@@ -63,7 +65,7 @@ public class ProductController {
 
             List<Product> totalProduct= productService.findAllProduct();
             int totalPage = (output.size()) / limit + ((output.size() % limit == 0) ? 0 : 1);
-            int total_count=totalProduct.size();
+            int total_count=output.size();
             Map<String, Object> paging= new HashMap<>();
             paging.put(InputParam.RECORD_IN_PAGE, limit);
             paging.put(InputParam.TOTAL_COUNT, total_count);
@@ -119,7 +121,7 @@ public class ProductController {
                 product.setPreview(preview);
                 product.setPrice(price);
                 product.setActive(true);
-                storageService.save(image);
+                filesStorageService.save(image);
                 product.setImage(fileDir+ image.getOriginalFilename());
                 productService.save(product);
             } catch (Exception e) {
@@ -134,18 +136,41 @@ public class ProductController {
     // cập nhật tt 1 sp
     @CrossOrigin
     @PutMapping(value = "/adminPage/products/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable("id") long productId, @RequestBody Product product, HttpServletRequest request) {
+    public ResponseEntity<Product> updateProduct(@PathVariable("id") long productId,
+                                                 @RequestParam(value = "name", required = false, defaultValue = "") String name,
+                                                 @RequestParam(value = "price", required = false, defaultValue = "") double price,
+                                                 @RequestParam(value = "categoryId",  required = false, defaultValue = "") long categoryId,
+                                                 @RequestParam(value = "description", required = false, defaultValue = "") String description,
+                                                 @RequestParam(value = "preview", required = false, defaultValue = "") String preview,
+                                                 @RequestParam(value = "image", required = false) MultipartFile image,
+                                                 HttpServletRequest request) {
         if(jwtService.isAdmin(request)){
             try{
                 Product currentProduct= productService.findById(productId);
                 if(!currentProduct.isActive()){
                     return new ResponseEntity("Product stopped selling!!!", HttpStatus.BAD_REQUEST);
                 }
-                if(product.getId()== 0 || productId!= product.getId()){
-                    return new ResponseEntity("Input wrong!", HttpStatus.BAD_REQUEST);
+                if(name!=""){
+                    currentProduct.setName(name);
                 }
-                Product newProduct= productService.update(product);
-                return new ResponseEntity<>(newProduct, HttpStatus.OK);
+                if(preview!=""){
+                    currentProduct.setPreview(preview);
+                }
+                if(String.valueOf(price)!=""){
+                    currentProduct.setPrice(price);
+                }
+                if(String.valueOf(categoryId)!=""){
+                    currentProduct.setCategory(categoryService.findById(categoryId));
+                }
+                if(description!=""){
+                    currentProduct.setDescription(description);
+                }
+                if(image!= null){
+                    filesStorageService.save(image);
+                    currentProduct.setImage(fileDir+ image.getOriginalFilename());
+                }
+                productService.save(currentProduct);
+                return new ResponseEntity<>(currentProduct, HttpStatus.OK);
             }
             catch (Exception e){
                 return new ResponseEntity("Product is not exist", HttpStatus.BAD_REQUEST);

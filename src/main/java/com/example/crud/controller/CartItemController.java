@@ -81,6 +81,7 @@ public class CartItemController {
                 int quantity = jsonObject.getInt(InputParam.QUANTITY);
                 long userId= jwtService.getCurrentUser(request).getUserId();
                 Cart cart = cartService.getCartByUserId(userId);
+                double totalMoney= 0;
                 CartItem cartItem= null;
                 List<CartItem> cartItemList = cartItemService.getListCartItemInCart(userId);
                 for (CartItem index : cartItemList) {
@@ -89,6 +90,9 @@ public class CartItemController {
                         cartItem= index;
                         if (quantity > 0) {
                             cartItemService.save(cartItem);
+                            totalMoney= totalMoney+ index.getProduct().getPrice()* quantity;
+                            cart.setTotalMoney(totalMoney);
+                            cartService.save(cart);
                         } else cartItemService.deleteCartItem(cartItem);
                         return new ResponseEntity<>(HttpStatus.OK);
                     }

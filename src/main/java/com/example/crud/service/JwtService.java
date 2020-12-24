@@ -1,6 +1,7 @@
 package com.example.crud.service;
 
 import com.example.crud.entity.User;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 

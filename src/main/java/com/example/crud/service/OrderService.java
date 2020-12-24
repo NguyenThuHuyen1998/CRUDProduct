@@ -2,6 +2,7 @@ package com.example.crud.service;
 
 import com.example.crud.entity.Order;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -17,5 +18,5 @@ public interface OrderService {
     List<Order> getListOrderByTime(String timeStart, String timeEnd);
     void save (Order order);
     void remove (Order order);
-    List<Order> filterOrder(Map<String, Object> filter);
+    List<Order> filterOrder(Map<String, Object> filter) throws ParseException;
 }

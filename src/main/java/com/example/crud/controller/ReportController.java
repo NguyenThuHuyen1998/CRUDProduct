@@ -2,11 +2,9 @@ package com.example.crud.controller;
 
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Order;
+import com.example.crud.entity.OrderLine;
 import com.example.crud.helper.TimeHelper;
-import com.example.crud.service.JwtService;
-import com.example.crud.service.OrderService;
-import com.example.crud.service.ReportService;
-import com.example.crud.service.UserService;
+import com.example.crud.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,66 +27,31 @@ import java.util.function.Predicate;
 public class ReportController {
 
     private OrderService orderService;
+    private OrderLineService orderLineService;
     private UserService userService;
     private ReportService reportService;
     private JwtService jwtService;
+    Map<Long, Integer> reportProduct= new HashMap<>();
+    Map<Long, Double> reportRevenue= new HashMap<>();
 
     @Autowired
-    public ReportController(OrderService orderService, UserService userService, ReportService reportService, JwtService jwtService){
+    public ReportController(OrderService orderService, UserService userService, ReportService reportService, JwtService jwtService, OrderLineService orderLineService){
         this.orderService= orderService;
         this.userService= userService;
         this.reportService= reportService;
         this.jwtService= jwtService;
+        this.orderLineService= orderLineService;
     }
 
-    @GetMapping
-    public ResponseEntity<Order> reportProduct(@RequestParam(value = "time", defaultValue = InputParam.TODAY) String time,
-                                               @RequestParam(value = "dateStart", defaultValue = "-1") String dateStart,
-                                               @RequestParam(value = "dateEnd", defaultValue = "-1") String dateEnd,
-                                               HttpServletRequest request){
+    @GetMapping(value = "/adminPage/report")
+    public ResponseEntity<Order> reportProduct(HttpServletRequest request){
         if(jwtService.isAdmin(request)){
             try{
-                String start="";
-                String end= "";
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/mm/yyyy");
-                TimeHelper timeHelper= new TimeHelper();
-                switch (time){
-                    case InputParam.TODAY:{
-                        start= LocalDate.now().format(formatter);
-                        end= LocalDate.now().format(formatter);
-                        break;
-                    }
-                    case InputParam.THIS_WEEK:{
-                        start= timeHelper.getFirstDayInWeek();
-                        end= timeHelper.getLastDayInWeek();
-                        break;
-                    }
-                    case InputParam.THIS_MONTH:{
-                        start= timeHelper.getFirstInMonth();
-                        end= timeHelper.getLastDayInMonth();
-                        break;
-                    }
-                    case InputParam.THIS_YEAR:{
-                        start= timeHelper.getFirstDayOfYear();
-                        end= timeHelper.getLastDayOfYear();
-                        break;
-                    }
-                    case InputParam.OPTION:{
-                        start= dateStart;
-                        end= dateEnd;
-                        break;
-                    }
-
+                Map<String, Object> report= reportService.getReport();
+                if(report.size()>0){
+                    return new ResponseEntity(report, HttpStatus.OK);
                 }
-                Map<String, Object> filter= new HashMap<>();
-                filter.put(InputParam.USER_ID, -1);
-                filter.put(InputParam.STATUS, "");
-                filter.put(InputParam.TIME_START, start);
-                filter.put(InputParam.TIME_END, end);
-                filter.put(InputParam.SORT_BY, "");
-                filter.put(InputParam.PRICE_MIN, -1);
-                filter.put(InputParam.PRICE_MAX, -1);
-                List<Order> orderList= reportService.filterOrder(filter);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
             catch (Exception e){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -100,7 +63,7 @@ public class ReportController {
 
     public static void main(String[] args) {
         Calendar dateStart= Calendar.getInstance();
-        DateFormat dateFormat= new SimpleDateFormat("dd/mm/yyyy");
+        DateFormat dateFormat= new SimpleDateFormat("dd/MM/yyyy");
 //        for (int i=0; i<6; i++){
 //            dateStart.add(Calendar.DATE, 1);
 //        }

@@ -48,14 +48,10 @@ public class CartController {
                 if(cartItemList.size()==0){
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 }
-                double money=0;
                 List<CartItemResponse> cartItemResponses = new ArrayList<>();
                 for (CartItem cartItem: cartItemList){
-                    money+= cartItem.getProduct().getPrice();
                     cartItemResponses.add(new CartItemResponse(cartItem));
                 }
-                cart.setTotalMoney(money);
-                cartService.save(cart);
                 CartResponse cartResponse = new CartResponse(cart, cartItemResponses);
                 return new ResponseEntity(cartResponse, HttpStatus.OK);
             }

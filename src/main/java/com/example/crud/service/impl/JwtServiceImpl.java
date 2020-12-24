@@ -7,6 +7,7 @@ import com.example.crud.service.JwtService;
 import com.example.crud.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,12 +16,13 @@ import javax.servlet.http.HttpServletRequest;
     created by HuyenNgTn on 10/12/2020
 */
 @Service
-public class JwtServiceImpl implements JwtService {
+public class JwtServiceImpl implements JwtService{
     public static final Logger logger = LoggerFactory.getLogger(JwtServiceImpl.class);
     private JwtTokenUtil jwtTokenUtil= new JwtTokenUtil();
 
     private UserService userService;
 
+    @Autowired
     public JwtServiceImpl(UserService userService){
         this.userService= userService;
     }
@@ -62,7 +64,6 @@ public class JwtServiceImpl implements JwtService {
         if(role.equals(InputParam.USER)) return true;
         return false;
     }
-
 
     @Override
     public String getUserName(HttpServletRequest request) {
