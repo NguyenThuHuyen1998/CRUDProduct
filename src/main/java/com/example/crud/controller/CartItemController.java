@@ -86,6 +86,7 @@ public class CartItemController {
                 List<CartItem> cartItemList = cartItemService.getListCartItemInCart(userId);
                 for (CartItem index : cartItemList) {
                     if(index.getCartItemId()== cartItemId){
+                        int oldQuantity= index.getQuantity();
                         index.setQuantity(quantity);
                         cartItem= index;
                         if (quantity > 0) {
@@ -93,7 +94,11 @@ public class CartItemController {
                             totalMoney= totalMoney+ index.getProduct().getPrice()* quantity;
                             cart.setTotalMoney(totalMoney);
                             cartService.save(cart);
-                        } else cartItemService.deleteCartItem(cartItem);
+                        } else {
+                            //quantity=0 thi xoa cartItem va tru di tong tien
+                            cart.setTotalMoney(cart.getTotalMoney()- index.getProduct().getPrice()*oldQuantity);
+                            cartItemService.deleteCartItem(cartItem);
+                        }
                         return new ResponseEntity<>(HttpStatus.OK);
                     }
                 }

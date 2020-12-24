@@ -65,6 +65,7 @@ public class ReportServiceImpl implements ReportService {
         String end= LocalDate.now().format(formatter);
         List<Order> orderList= filterOrder(start, end);
         Map<String, Long> reportToday= getReportProduct(orderList);
+        
         return reportToday;
     }
 

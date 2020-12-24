@@ -45,9 +45,8 @@ public class CartController {
                 long userId= jwtService.getCurrentUser(request).getUserId();
                 Cart cart= cartService.getCartByUserId(userId);
                 List<CartItem> cartItemList= cartItemService.getListCartItemInCart(userId);
-                if(cartItemList.size()==0){
-                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                }
+
+                // cartItemResponse la form tra ve danh sach san pham trong cart
                 List<CartItemResponse> cartItemResponses = new ArrayList<>();
                 for (CartItem cartItem: cartItemList){
                     cartItemResponses.add(new CartItemResponse(cartItem));
