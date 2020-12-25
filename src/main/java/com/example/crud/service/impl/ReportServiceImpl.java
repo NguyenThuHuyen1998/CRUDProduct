@@ -27,8 +27,8 @@ public class ReportServiceImpl implements ReportService {
     private OrderRepository orderRepository;
     private OrderLineRepository orderLineRepository;
     private ProductRepository productRepository;
-    private Map<String, Object> reportRevenue= new HashMap<>();
-    private Map<String, Long> reportProduct= new HashMap<>();
+    private Map<String, Object> reportRevenue;
+    private Map<String, Long> reportProduct;
     private Map<String, Object> report;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     TimeHelper timeHelper= new TimeHelper();
@@ -65,7 +65,12 @@ public class ReportServiceImpl implements ReportService {
         String end= LocalDate.now().format(formatter);
         List<Order> orderList= filterOrder(start, end);
         Map<String, Long> reportToday= getReportProduct(orderList);
-        
+        long count= 0;
+        for(Map.Entry<String, Long> entry : reportToday.entrySet()) {
+            if(entry.getKey().equals("total")) continue;
+            count= count+ entry.getValue();
+        }
+        reportToday.put("totalCount", count);
         return reportToday;
     }
 
@@ -74,6 +79,12 @@ public class ReportServiceImpl implements ReportService {
         String end= timeHelper.getLastDayInWeek();
         List<Order> orderList= filterOrder(start, end);
         Map<String, Long> reportThisWeek= getReportProduct(orderList);
+        long count= 0;
+        for(Map.Entry<String, Long> entry : reportThisWeek.entrySet()) {
+            if(entry.getKey().equals("total")) continue;
+            count= count+ entry.getValue();
+        }
+        reportThisWeek.put("totalCount", count);
         return reportThisWeek;
     }
 
@@ -82,6 +93,12 @@ public class ReportServiceImpl implements ReportService {
         String end= timeHelper.getLastDayInMonth();
         List<Order> orderList= filterOrder(start, end);
         Map<String, Long> reportThisMonth= getReportProduct(orderList);
+        long count= 0;
+        for(Map.Entry<String, Long> entry : reportThisMonth.entrySet()) {
+            if(entry.getKey().equals("total")) continue;
+            count= count+ entry.getValue();
+        }
+        reportThisMonth.put("totalCount", count);
         return reportThisMonth;
     }
 
@@ -90,12 +107,19 @@ public class ReportServiceImpl implements ReportService {
         String end= timeHelper.getLastDayOfYear();
         List<Order> orderList= filterOrder(start, end);
         Map<String, Long> reportThisYear= getReportProduct(orderList);
+        long count= 0;
+        for(Map.Entry<String, Long> entry : reportThisYear.entrySet()) {
+            if(entry.getKey().equals("total")) continue;
+            count= count+ entry.getValue();
+        }
+        reportThisYear.put("totalCount", count);
         return reportThisYear;
     }
 
 
     public Map<String, Long> getReportProduct(List<Order> orders){
         try{
+            reportProduct= new HashMap<>();
             double totalRevenue= 0;
             if(orders.size()>0){
                 for(Order order: orders){
@@ -114,10 +138,9 @@ public class ReportServiceImpl implements ReportService {
                     }
                     totalRevenue= totalRevenue+ order.getTotalPrice();
                 }
-                reportProduct.put("total", (long) totalRevenue);
-                return reportProduct;
             }
-            return null;
+            reportProduct.put("total", (long) totalRevenue);
+            return reportProduct;
         }
         catch (Exception e){
             return null;

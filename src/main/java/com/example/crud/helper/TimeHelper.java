@@ -55,6 +55,16 @@ public class TimeHelper {
         return date+"/"+month+"/"+ year;
     }
 
+    public static void main(String[] args) {
+        Calendar calendar= Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
+        System.out.println(calendar.getTime());
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        System.out.println(calendar.getTime());
+//        calendar.add(calendar.getFirstDayOfWeek(), 7);
+
+    }
+
     public String getLastDayInWeek(){
         DayOfWeek day = LocalDate.now().getDayOfWeek();
         calendar.add(Calendar.DATE, 7-day.getValue());
