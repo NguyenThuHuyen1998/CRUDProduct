@@ -2,6 +2,7 @@ package com.example.crud.controller;
 
 import com.example.crud.entity.Order;
 import com.example.crud.input.ChangePasswordForm;
+import com.example.crud.input.ConfirmPassword;
 import com.example.crud.input.UserForm;
 import com.example.crud.predicate.PredicateOrderFilter;
 import com.example.crud.service.OrderService;
@@ -96,12 +97,10 @@ public class UserController {
                 long userId = jwtHandler.getCurrentUser(request).getUserId();
                 User user = userService.findById(userId);
                 passwordEncoder = new BCryptPasswordEncoder();
-                if (passwordEncoder.matches(data.getOldPass(), user.getPassword()) && data.validatePassword()) {
-                    user.setPassword(passwordEncoder.encode(data.getNewPass()));
-                    userService.add(user);
+                if (userService.changePassword(user, data.getOldPass(), data.getNewPass())) {
                     return new ResponseEntity("Success", HttpStatus.OK);
                 }
-                return new ResponseEntity("Not Found User", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity("Password is wrong", HttpStatus.BAD_REQUEST);
             } catch (Exception e) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
@@ -119,16 +118,27 @@ public class UserController {
         if (user == null) {
             return new ResponseEntity("Username is not exist", HttpStatus.BAD_REQUEST);
         }
-        int randomStrLength = 10;
-        char[] possibleCharacters = (new String("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")).toCharArray();
-        String randomStr = RandomStringUtils.random(randomStrLength, 0, possibleCharacters.length - 1, false, false, possibleCharacters, new SecureRandom());
-        user.setPassword(passwordEncoder.encode(randomStr));
-        userService.add(user);
-        String message = "Mật khẩu mới của bạn là: " + randomStr + ". Vui lòng đổi mật khẩu mới sau khi đăng nhập.";
+        String randomStr= userService.forgetPassword(user);
+        String message = "Mã xác nhận của account "+ userName+ " là: " + randomStr;
         if (!sendEmailService.resetPassword(message, user.getEmail())) {
             return new ResponseEntity("Can't send reset password for you", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity("Mã xác nhận đã được gửi tới email của bạn.", HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/user/confirmPassword")
+    public ResponseEntity<User> confirmPassword(@RequestBody ConfirmPassword confirmPassword){
+        String userName= confirmPassword.getUserName();
+        String confirmCode= confirmPassword.getConfirmCode();
+        String newPassword= confirmPassword.getNewPassword();
+        User user= userService.findByName(userName);
+        if(user== null){
+            return new ResponseEntity("User not found", HttpStatus.BAD_REQUEST);
+        }
+        if(userService.changePassword(user, confirmCode, newPassword)){
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity("Confirm code is wrong", HttpStatus.BAD_REQUEST);
     }
 //        catch (Exception e){
 //            return new ResponseEntity("Username is not exist", HttpStatus.BAD_REQUEST);

@@ -4,15 +4,18 @@ import com.example.crud.entity.User;
 import com.example.crud.repository.UserRepository;
 import com.example.crud.service.UserService;
 import com.example.crud.entity.CustomUserDetails;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,10 +29,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public static final Logger logger = getLogger(UserServiceImpl.class);
 
     private UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder= passwordEncoder;
     }
 
     @Override
@@ -112,6 +117,26 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new UsernameNotFoundException(username);
         }
         return new CustomUserDetails(user);
+    }
+
+    @Override
+    public String forgetPassword(User user) {
+        int randomStrLength = 10;
+        char[] possibleCharacters = (new String("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")).toCharArray();
+        String randomStr = RandomStringUtils.random(randomStrLength, 0, possibleCharacters.length - 1, false, false, possibleCharacters, new SecureRandom());
+        user.setPassword(passwordEncoder.encode(randomStr));
+        add(user);
+        return randomStr;
+    }
+
+    @Override
+    public boolean changePassword(User user, String oldPass, String newPass) {
+        if (passwordEncoder.matches(oldPass, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPass));
+            add(user);
+            return true;
+        }
+        return false;
     }
 
     // JWTAuthenticationFilter sẽ sử dụng hàm này

@@ -65,11 +65,9 @@ public class PredicateOrderFilter {
             String start= dateStart+" 00:00:00";
             DateFormat formatter=new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             timeStart=formatter.parse(start).getTime();
-            System.out.println(timeStart);
 
             String end= dateEnd+" 23:59:59";
             timeEnd=formatter.parse(end).getTime();
-            System.out.println(timeStart);
         }
         long finalTimeStart = timeStart;
         long finalTimeEnd = timeEnd;

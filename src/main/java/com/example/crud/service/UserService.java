@@ -18,6 +18,8 @@ public interface UserService {
     void update(User user);
     void delete (User user);
     boolean checkLogin(User user);
-    public UserDetails loadUserById(Long id);
-    public UserDetails loadUserByUsername(String username);
+    UserDetails loadUserById(Long id);
+    UserDetails loadUserByUsername(String username);
+    String forgetPassword(User user);
+    boolean changePassword(User user, String oldPass, String newPass);
 }

@@ -10,16 +10,10 @@ public class ChangePasswordForm {
     public static final Logger logger = LoggerFactory.getLogger(ChangePasswordForm.class);
     private String oldPass;
     private String newPass;
-    private String rePass;
 
-    public ChangePasswordForm(String oldPass, String newPass, String rePass) {
+    public ChangePasswordForm(String oldPass, String newPass) {
         this.oldPass = oldPass;
         this.newPass = newPass;
-        this.rePass = rePass;
-    }
-
-    public boolean validatePassword(){
-        return newPass.equals(rePass) ? true: false;
     }
 
     public String getOldPass() {
@@ -36,13 +30,5 @@ public class ChangePasswordForm {
 
     public void setNewPass(String newPass) {
         this.newPass = newPass;
-    }
-
-    public String getRePass() {
-        return rePass;
-    }
-
-    public void setRePass(String rePass) {
-        this.rePass = rePass;
     }
 }

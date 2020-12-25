@@ -21,73 +21,31 @@ public class TimeHelper {
 
     private static TimeHelper timeHelper= new TimeHelper();
     private static Calendar calendar= Calendar.getInstance();
+    private SimpleDateFormat simpleDateFormat= new SimpleDateFormat("dd/MM/yyyy");
     public static TimeHelper getInstance(){
         return timeHelper;
     }
 
     public long convertTimestamp(String dateStr) throws ParseException {
-        SimpleDateFormat simpleDateFormat= new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date= simpleDateFormat.parse(dateStr);
         return date.getTime();
     }
 
     public String getFirstDayInWeek(){
-        DayOfWeek day = LocalDate.now().getDayOfWeek();
-        calendar.add(Calendar.DATE, -day.getValue()+1);
-        Calendar c = Calendar.getInstance();
-        String month =String.valueOf(calendar.get(Calendar.MONTH)+ 1);
-        String year;
-        int dayOfMonth= calendar.get(Calendar.DAY_OF_MONTH);
-        String date= String.valueOf(dayOfMonth);
-        if(dayOfMonth<10){
-            StringBuilder sb= new StringBuilder("0");
-            sb.append(String.valueOf(dayOfMonth));
-            date= sb.toString();
-        }
-        if(calendar.get(Calendar.MONTH)<9){
-            StringBuilder sb= new StringBuilder("0");
-            sb.append(String.valueOf(calendar.get(Calendar.MONTH)));
-            month= sb.toString();
-        }
-        c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        year= String.valueOf(calendar.get(Calendar.YEAR));
-        System.out.println("Date: " + date+ "/"+ month+"/"+ year);
-        return date+"/"+month+"/"+ year;
-    }
-
-    public static void main(String[] args) {
-        Calendar calendar= Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
-        System.out.println(calendar.getTime());
+        // ngày đầu tiên trong tuần là chủ nhật tuần trước
         calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
-        System.out.println(calendar.getTime());
-//        calendar.add(calendar.getFirstDayOfWeek(), 7);
-
+        String dateStart= simpleDateFormat.format(calendar.getTime());
+        return dateStart;
     }
 
     public String getLastDayInWeek(){
-        DayOfWeek day = LocalDate.now().getDayOfWeek();
-        calendar.add(Calendar.DATE, 7-day.getValue());
-        Calendar c = Calendar.getInstance();
-        String month;
-        String year;
-        int dayOfMonth= calendar.get(Calendar.DAY_OF_MONTH);
-        String date= String.valueOf(dayOfMonth);
-        if(dayOfMonth<10){
-            StringBuilder sb= new StringBuilder("0");
-            sb.append(String.valueOf(dayOfMonth));
-            date= sb.toString();
+        // ngày cuối cùng của tuần là t7
+        int day = calendar.get(Calendar.DAY_OF_YEAR);
+        while(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
+            calendar.set(Calendar.DAY_OF_YEAR, ++day);
         }
-        if(calendar.get(Calendar.MONTH)<9){
-            StringBuilder sb= new StringBuilder("0");
-            sb.append(String.valueOf(calendar.get(Calendar.MONTH)));
-            month= sb.toString();
-        }
-        c.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        month= String.valueOf(calendar.get(Calendar.MONTH)+ 1);
-        year= String.valueOf(calendar.get(Calendar.YEAR));
-        System.out.println("Date: " + date+ "/"+ month+"/"+ year);
-        return date+"/"+month+"/"+ year;
+        String dateEnd= simpleDateFormat.format(calendar.getTime());
+        return dateEnd;
     }
 
 
