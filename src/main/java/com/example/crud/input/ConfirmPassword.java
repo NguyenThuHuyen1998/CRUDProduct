@@ -1,23 +1,22 @@
 package com.example.crud.input;
 
-public class ConfirmPassword {
-    private String confirmCode;
-    private String newPassword;
-    private String userName;
+import org.hibernate.validator.constraints.Length;
 
-    public ConfirmPassword(String userName, String confirmCode, String newPassword) {
-        this.userName= userName;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+public class ConfirmPassword {
+    @NotEmpty(message = "*Please provide your confirm code")
+    private String confirmCode;
+    @Length(min = 5)
+    @NotEmpty(message = "*Please pro")
+    private String newPassword;
+
+    public ConfirmPassword(String confirmCode, String newPassword) {
         this.confirmCode = confirmCode;
         this.newPassword = newPassword;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
 
     public String getConfirmCode() {
         return confirmCode;

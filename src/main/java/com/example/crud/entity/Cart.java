@@ -24,6 +24,9 @@ public class Cart implements Serializable {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "discount", nullable = false)
+    private double discount;
+
 //    @OneToMany(fetch = FetchType.LAZY, mappedBy = "cart")
 //    private List<CartItem> cartItems;
 
@@ -61,6 +64,14 @@ public class Cart implements Serializable {
 
     public void setTotalMoney(double totalMoney) {
         this.totalMoney = totalMoney;
+    }
+
+    public double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(double discount) {
+        this.discount = discount;
     }
 }
 

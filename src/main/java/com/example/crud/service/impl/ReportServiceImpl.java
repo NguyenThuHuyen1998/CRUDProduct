@@ -3,6 +3,7 @@ package com.example.crud.service.impl;
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.Order;
 import com.example.crud.entity.OrderLine;
+import com.example.crud.entity.Product;
 import com.example.crud.helper.TimeHelper;
 import com.example.crud.repository.ProductRepository;
 import com.example.crud.response.ReportProductResponse;
@@ -16,9 +17,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.LongStream;
 
@@ -136,7 +135,7 @@ public class ReportServiceImpl implements ReportService {
                             reportProduct.put(productName, Long.valueOf(orderLine.getAmount()));
                         }
                     }
-                    totalRevenue= totalRevenue+ order.getTotalPrice();
+                    totalRevenue= totalRevenue+ order.getRealPay();
                 }
             }
             reportProduct.put("total", (long) totalRevenue);
@@ -147,22 +146,40 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-
-//    public Map<String, Object> getReportOrder(List<Order> orders){
-////        reportOrder.put(InputParam.PROCESSING, 0);
-////        reportOrder.put(InputParam.SHIPPING, 0);
-////        reportOrder.put(InputParam.FINISHED, 0);
-//        if(orders.size()>0){
-//            for (Order order: orders){
-//                String status= order.getStatus();
-//                if(reportOrder.containsKey(status)){
-//                    ReportProduct report= (ReportProduct) reportProduct.get(productId);
-//                    report.setQuantity(report.getQuantity()+ orderLine.getAmount());
-//                    report.setRevenue(report.getRevenue()+ orderLine.getValueLine());
+    public List<Product> getListProductBestSeller(int limit) throws ParseException {
+//        // get list best seller product in this month
+//        String start= timeHelper.getFirstInMonth();
+//        String end= timeHelper.getLastDayInMonth();
+//        List<Order> orderList= filterOrder(start, end);
+//        for(Order order: orderList){
+//            if (order.getStatus().equals(InputParam.PROCESSING) ) continue;
+//            List<OrderLine> orderLines= orderLineRepository.getListOrderLineInOrder(order.getOrderId());
+//            for (OrderLine orderLine: orderLines){
+//                long productId= orderLine.getProduct().getId();
+//                String productName= productRepository.findById(productId).get().getName();
+//                if(reportProduct.containsKey(productId)){
+//                    long count= reportProduct.get(productId);
+//                    reportProduct.put(productName, count+orderLine.getAmount());
+//                }
+//                else {
+//                    reportProduct.put(productName, Long.valueOf(orderLine.getAmount()));
 //                }
 //            }
+//            totalRevenue= totalRevenue+ order.getTotalPrice();
 //        }
-//    }
-
+//        Map<String, Long> reportByMonth = getReportByMonth();
+//        LinkedHashMap<String, Long> sortedMap = new LinkedHashMap<>();
+//
+//        reportByMonth.entrySet()
+//                .stream()
+//                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+//                .forEachOrdered(x -> sortedMap.put(x.getKey(), x.getValue()));
+//        List<Long> productIds= new ArrayList<>();
+//        reportByMonth.entrySet().stream()
+//                .limit(5)
+//                .forEach(e -> productIds.add());
+        return null;
+    }
 
 }
+

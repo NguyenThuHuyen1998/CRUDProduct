@@ -1,6 +1,7 @@
 package com.example.crud.predicate;
 
 import com.example.crud.entity.Order;
+import com.example.crud.helper.TimeHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +36,16 @@ public class PredicateOrderFilter {
                     if(maxPrice ==-1){
                         return true;
                     }
-                    if(order.getTotalPrice() <= maxPrice){
+                    if(order.getRealPay() <= maxPrice){
                         return true;
                     }
                 }
                 else if(maxPrice== -1){
-                    if (order.getTotalPrice() >= minPrice){
+                    if (order.getRealPay() >= minPrice){
                         return true;
                     }
                 }
-                else if(order.getTotalPrice() >= minPrice && order.getTotalPrice() <= maxPrice){
+                else if(order.getRealPay() >= minPrice && order.getRealPay() <= maxPrice){
                     return true;
                 }
                 return false;
@@ -61,6 +62,7 @@ public class PredicateOrderFilter {
     public Predicate<Order> checkDate(String dateStart, String dateEnd) throws ParseException {
         long timeStart= -1;
         long timeEnd= -1;
+
         if(!dateEnd.equals("-1") && !dateStart.equals("-1")){
             String start= dateStart+" 00:00:00";
             DateFormat formatter=new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -77,16 +79,16 @@ public class PredicateOrderFilter {
                     if(finalTimeEnd ==-1){
                         return true;
                     }
-                    if(order.getDateSell() <= finalTimeEnd){
+                    if(order.getTime() <= finalTimeEnd){
                         return true;
                     }
                 }
                 else if(finalTimeEnd== -1){
-                    if (order.getDateSell() >= finalTimeStart){
+                    if (order.getTime() >= finalTimeStart){
                         return true;
                     }
                 }
-                else if(order.getDateSell() >= finalTimeStart && order.getDateSell() <= finalTimeEnd){
+                else if(order.getTime() >= finalTimeStart && order.getTime() <= finalTimeEnd){
                     return true;
                 }
                 return false;

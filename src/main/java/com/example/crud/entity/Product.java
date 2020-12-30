@@ -9,8 +9,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Table(name = "tblPRODUCTS")
-public class
-Product implements Serializable {
+public class Product implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id

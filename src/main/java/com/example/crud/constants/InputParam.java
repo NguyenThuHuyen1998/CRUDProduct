@@ -28,9 +28,12 @@ public class InputParam {
     public static final String LIMIT= "limit";
     public static final String ADMIN= "admin";
     public static final String USER= "user";
+    public static final String USER_NAME= "userName";
     public static final String QUANTITY= "quantity";
     public static final String DATA= "data";
     public static final String PAGING= "paging";
+    public static final String TOTAL= "total";
+    public static final String COUNT= "totalCount";
     public static final String TOTAL_COUNT= "total_count";
     public static final String RECORD_IN_PAGE= "record_in_page";
     public static final String TOTAL_PAGE= "total_page";

@@ -1,6 +1,10 @@
 package com.example.crud.service;
 
+import com.example.crud.entity.Address;
+import com.example.crud.entity.Cart;
 import com.example.crud.entity.Order;
+import com.example.crud.entity.User;
+import com.example.crud.response.OrderResponse;
 
 import java.text.ParseException;
 import java.util.List;
@@ -14,9 +18,8 @@ public interface OrderService {
     Order findById(Long orderId);
     Order getOrder(Long orderId);
     List<Order> getListOrderByUserId(long userId);
-    List<Order> getListOrderByStatus(String status);
-    List<Order> getListOrderByTime(String timeStart, String timeEnd);
     void save (Order order);
     void remove (Order order);
     List<Order> filterOrder(Map<String, Object> filter) throws ParseException;
+    OrderResponse createOrder(User user);
 }

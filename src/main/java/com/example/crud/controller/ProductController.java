@@ -47,8 +47,6 @@ public class ProductController {
     public ResponseEntity<Product> getAllProduct(@RequestParam(required = false, defaultValue = "") String keyword,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMin,
                                          @RequestParam(required = false, defaultValue = "-1") double priceMax,
-                                         @RequestParam(required = false, defaultValue = "-1") String timeStart,
-                                         @RequestParam(required = false, defaultValue = "-1") String timeEnd,
                                          @RequestParam(required = false, defaultValue = "0") long categoryId,
                                          @RequestParam(required = false, defaultValue = "") String sortBy,
                                          @RequestParam(required = false, defaultValue = "9") int limit,
@@ -57,8 +55,6 @@ public class ProductController {
             input.put(InputParam.KEY_WORD, keyword);
             input.put(InputParam.PRICE_MAX, priceMax);
             input.put(InputParam.PRICE_MIN, priceMin);
-            input.put(InputParam.TIME_START, timeStart);
-            input.put(InputParam.TIME_END, timeEnd);
             input.put(InputParam.CATEGORY_ID, categoryId);
             input.put(InputParam.SORT_BY, sortBy);
             List<Product> output = productService.filterProduct(input);
@@ -77,6 +73,10 @@ public class ProductController {
             return new ResponseEntity(result, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/products/bestSeller")
+    public ResponseEntity<Product> getListProductBestSeller(){
+        return null;
+    }
 
     // xem chi tiết 1 sản phẩm
     @CrossOrigin
@@ -97,7 +97,20 @@ public class ProductController {
     }
 
     //---------------------------------------ADMIN--------------------------------------------------
-
+//    @GetMapping(value = "/adminPage/products")
+//    public ResponseEntity<Product> getAllProductByAdmin(@RequestParam(required = false, defaultValue = "") String keyword,
+//                                                         @RequestParam(required = false, defaultValue = "-1") double priceMin,
+//                                                         @RequestParam(required = false, defaultValue = "-1") double priceMax,
+//                                                         @RequestParam(required = false, defaultValue = "0") long categoryId,
+//                                                         @RequestParam(required = false, defaultValue = "") String sortBy,
+//                                                         @RequestParam(required = false, defaultValue = "9") int limit,
+//                                                         @RequestParam(required = false, defaultValue = "1") int page,
+//                                                        HttpServletRequest request) throws ParseException {
+//        if(jwtService.isAdmin(request)){
+//            getAllProduct(keyword, priceMin, priceMax, categoryId, sortBy, limit, page);
+//        }
+//        return new ResponseEntity("You isn't admin", HttpStatus.METHOD_NOT_ALLOWED);
+//    }
 
     // tạo mới 1 sản phẩm
 
@@ -114,6 +127,9 @@ public class ProductController {
             Product product= new Product();
             try {
                 Category category = categoryService.findById(categoryId);
+                if (category== null){
+                    return new ResponseEntity("Category is not exist", HttpStatus.BAD_REQUEST);
+                }
                 product.setCategory(category);
                 product.setName(name);
                 product.setDateAdd(new Date().getTime());

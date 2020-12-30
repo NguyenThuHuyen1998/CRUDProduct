@@ -1,13 +1,19 @@
 package com.example.crud.service.impl;
 
 import com.example.crud.constants.InputParam;
-import com.example.crud.entity.Order;
+import com.example.crud.entity.*;
+import com.example.crud.helper.TimeHelper;
+import com.example.crud.output.OrderLineForm;
 import com.example.crud.predicate.PredicateOrderFilter;
+import com.example.crud.repository.CartItemRepository;
+import com.example.crud.repository.CartRepository;
 import com.example.crud.repository.OrderLineRepository;
 import com.example.crud.repository.OrderRepository;
+import com.example.crud.response.OrderResponse;
 import com.example.crud.service.OrderService;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Predicate;
 import org.slf4j.Logger;
@@ -24,6 +30,8 @@ public class OrderServiceImpl implements OrderService {
     public static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private OrderRepository orderRepository;
+    private CartRepository cartRepository;
+    private CartItemRepository cartItemRepository;
 
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository){
@@ -65,28 +73,28 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.getListOrderByUserId(userId);
     }
 
-    @Override
-    public List<Order> getListOrderByStatus(String status) {
-        try{
-            Sort sort= Sort.by("dateSell").descending();
-            List<Order> list= orderRepository.getListByStatus(status);
-            return list;
-        }
-        catch (Exception e){
-            return null;
-        }
-    }
+//    @Override
+//    public List<Order> getListOrderByStatus(OrderStatus status) {
+//        try{
+//            //Sort sort= Sort.by("dateSell").descending();
+//            List<Order> list= orderRepository.getListByStatus(status);
+//            return list;
+//        }
+//        catch (Exception e){
+//            return null;
+//        }
+//    }
 
-    @Override
-    public List<Order> getListOrderByTime(String timeStart, String timeEnd) {
-        Date start= new Date(timeStart+" 00:00:00");
-        Date end= new Date((timeEnd+" 23:59:59"));
-        long startTime= start.getTime();
-        long endTime= end.getTime();
-        List<Order> orderList= orderRepository.getListByTime(startTime, endTime);
-        System.out.println(orderList);
-        return orderList;
-    }
+//    @Override
+//    public List<Order> getListOrderByTime(String timeStart, String timeEnd) {
+//        Date start= new Date(timeStart+" 00:00:00");
+//        Date end= new Date((timeEnd+" 23:59:59"));
+//        long startTime= start.getTime();
+//        long endTime= end.getTime();
+//        List<Order> orderList= orderRepository.getListByTime(startTime, endTime);
+//        System.out.println(orderList);
+//        return orderList;
+//    }
 
     @Override
     public void save(Order order) {
@@ -116,27 +124,51 @@ public class OrderServiceImpl implements OrderService {
         Predicate<Order> checkUser= predicateOrderFilter.checkUser(userId);
         predicate= checkPrice.and(checkDate).and(checkUser).and(checkStatus);
         List<Order> orderList=predicateOrderFilter.filterOrder(findAllOrder(), predicate);
-        orderList= sortByDateSell(orderList, sortBy);
+        //orderList= sortByDateSell(orderList, sortBy);
         return orderList;
 
     }
 
+    @Override
+    public OrderResponse createOrder(User user) {
+        long userId = user.getUserId();
+        Order order = new Order(user, OrderStatus.PROCESSING, new Date().getTime());
+        List<CartItem> cartItemList = cartItemRepository.getListCartItemInCart(userId);
+        List<OrderLineForm> orderLineForms= new ArrayList<>();
+        if (cartItemList != null && cartItemList.size() > 0) {
+            order = new Order(user, OrderStatus.PROCESSING, new Date().getTime());
+            for (CartItem cartItem : cartItemList) {
+                OrderLine orderLine = new OrderLine(cartItem, order);
+                OrderLineForm orderLineForm= new OrderLineForm(orderLine);
+                orderLineForms.add(orderLineForm);
+            }
+        }
+        OrderResponse orderResponse= new OrderResponse(order, orderLineForms);
+        return orderResponse;
+    }
+
 
     public List<Order> sortByDateSell(List<Order> orders, String sortBy){
-        if(sortBy.equals(InputParam.INCREASE)){
-            Collections.sort(orders, new Comparator<Order>() {
-                public int compare(Order o1, Order o2) {
-                    return o1.getDateSell() > o2.getDateSell() ? 1 : (o1 == o2 ? 0 : -1);
-                }
-            });
-        }
-        if (sortBy.equals(InputParam.DECREASE)){
-            Collections.sort(orders, new Comparator<Order>() {
-                public int compare(Order o1, Order o2) {
-                    return o1.getDateSell() < o2.getDateSell() ? 1 : (o1 == o2 ? 0 : -1);
-                }
-            });
-        }
+//        if(sortBy.equals(InputParam.INCREASE)){
+//            Collections.sort(orders, new Comparator<Order>() {
+//                public int compare(Order o1, Order o2) {
+//                    return o1.getDateSell() > o2.getDateSell() ? 1 : (o1 == o2 ? 0 : -1);
+//                }
+//            });
+//        }
+//        if (sortBy.equals(InputParam.DECREASE)){
+//            Collections.sort(orders, new Comparator<Order>() {
+//                public int compare(Order o1, Order o2) {
+//                    return o1.getDateSell() < o2.getDateSell() ? 1 : (o1 == o2 ? 0 : -1);
+//                }
+//            });
+//        }
         return orders;
+    }
+
+    public static void main(String[] args) throws ParseException {
+        SimpleDateFormat simpleDateFormat= new SimpleDateFormat("dd/MM/yyyy");
+        Date date= simpleDateFormat.parse("22/12/2020");
+        System.out.println(date.getTime());
     }
 }

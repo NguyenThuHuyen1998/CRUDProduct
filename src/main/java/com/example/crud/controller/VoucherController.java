@@ -1,7 +1,7 @@
 package com.example.crud.controller;
 
-import com.example.crud.entity.Coupon;
-import com.example.crud.service.CouponService;
+import com.example.crud.entity.Voucher;
+import com.example.crud.service.VoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-public class CouponController {
+public class VoucherController {
 
-    private CouponService couponService;
+    private VoucherService voucherService;
 
     @Autowired
-    public CouponController(CouponService couponService){
-        this.couponService= couponService;
+    public VoucherController(VoucherService voucherService){
+        this.voucherService= voucherService;
     }
 
     @GetMapping(value = "/adminPage/coupons")
-    public ResponseEntity<Coupon> getListCoupon(HttpServletRequest request){
+    public ResponseEntity<Voucher> getListCoupon(HttpServletRequest request){
 //        try{
 //
 //        }

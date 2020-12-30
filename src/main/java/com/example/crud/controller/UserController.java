@@ -110,25 +110,24 @@ public class UserController {
 
 
     @PostMapping(value = "/user/forgetPassword")
-    public ResponseEntity<User> forgetPassword(@RequestBody String data) {
-        JSONObject jsonObject = new JSONObject(data);
-        String userName = jsonObject.getString("userName");
+    public ResponseEntity<User> forgetPassword(@RequestParam(name = "userName") String userName) {
 //        try{
         User user = userService.findByName(userName);
         if (user == null) {
             return new ResponseEntity("Username is not exist", HttpStatus.BAD_REQUEST);
         }
         String randomStr= userService.forgetPassword(user);
-        String message = "Mã xác nhận của account "+ userName+ " là: " + randomStr;
+        String message = "Confirm code of account "+ userName+ " is: " + randomStr;
         if (!sendEmailService.resetPassword(message, user.getEmail())) {
             return new ResponseEntity("Can't send reset password for you", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity("Mã xác nhận đã được gửi tới email của bạn.", HttpStatus.OK);
+        return new ResponseEntity("Confirm code sent to your email.", HttpStatus.OK);
     }
 
     @PostMapping(value = "/user/confirmPassword")
-    public ResponseEntity<User> confirmPassword(@RequestBody ConfirmPassword confirmPassword){
-        String userName= confirmPassword.getUserName();
+    public ResponseEntity<User> confirmPassword(@RequestBody ConfirmPassword confirmPassword,
+                                                HttpServletRequest request){
+        String userName= request.getHeader(InputParam.USER_NAME);
         String confirmCode= confirmPassword.getConfirmCode();
         String newPassword= confirmPassword.getNewPassword();
         User user= userService.findByName(userName);

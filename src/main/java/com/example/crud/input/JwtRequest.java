@@ -17,6 +17,10 @@ public class JwtRequest implements Serializable {
 //		this.roles= roles;
 	}
 
+	public JwtRequest(String username){
+		this.username= username;
+	}
+
 	public String getUsername() {
 		return this.username;
 	}

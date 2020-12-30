@@ -1,11 +1,15 @@
 package com.example.crud.entity;
 
+import org.json.JSONObject;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 
 @Entity
-@Table(name = "address_ship")
-public class AddressShip {
+@Table(name = "tblAddress")
+public class Address implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,17 +36,42 @@ public class AddressShip {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "note")
+    private String note;
 
-    public AddressShip(long addressId, @NotEmpty(message = "*Please provider your city") String city, @NotEmpty(message = "*Please provider your district") String district, @NotEmpty(message = "*Please provider your street") String street, @NotEmpty(message = "*Please provider your phone") String phone, User user) {
+    @NotEmpty
+    @Column(name = "delivery")
+    private String delivery;
+
+    public Address(long addressId, @NotEmpty(message = "*Please provider your city") String city, @NotEmpty(message = "*Please provider your district") String district, @NotEmpty(message = "*Please provider your street") String street, @NotEmpty(message = "*Please provider your phone") String phone, User user, @NotEmpty String delivery, String note) {
         this.addressId = addressId;
         this.city = city;
         this.district = district;
         this.street = street;
         this.phone = phone;
         this.user = user;
+        this.delivery= delivery;
+        this.note= note;
     }
 
-    public AddressShip() {
+    public Address(String city, String district, String street, String phone, String delivery){
+        this.city= city;
+        this.delivery= delivery;
+        this.district= district;
+        this.street= street;
+        this.phone= phone;
+    }
+
+    public Address(String data){
+        JSONObject jsonObject= new JSONObject(data);
+        this.city= jsonObject.getString("city");
+        this.delivery= jsonObject.getString("delivery");
+        this.district= jsonObject.getString("district");
+        this.street= jsonObject.getString("street");
+        this.phone= jsonObject.getString("phone");
+    }
+
+    public Address() {
 
     }
 
@@ -92,5 +121,21 @@ public class AddressShip {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getDelivery() {
+        return delivery;
+    }
+
+    public void setDelivery(String delivery) {
+        this.delivery = delivery;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

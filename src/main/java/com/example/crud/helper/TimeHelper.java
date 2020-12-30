@@ -22,14 +22,27 @@ public class TimeHelper {
     private static TimeHelper timeHelper= new TimeHelper();
     private static Calendar calendar= Calendar.getInstance();
     private SimpleDateFormat simpleDateFormat= new SimpleDateFormat("dd/MM/yyyy");
+    private SimpleDateFormat dateFormat= new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     public static TimeHelper getInstance(){
         return timeHelper;
     }
 
     public long convertTimestamp(String dateStr) throws ParseException {
-        Date date= simpleDateFormat.parse(dateStr);
+        Date date= dateFormat.parse(dateStr);
         return date.getTime();
     }
+
+
+    public String getNow(){
+        Date date = new Date();
+        return simpleDateFormat.format(date);
+    }
+
+    public String getDate(long timestamp){
+        Date date= new Date(timestamp);
+        return simpleDateFormat.format(date);
+    }
+
 
     public String getFirstDayInWeek(){
         // ngày đầu tiên trong tuần là chủ nhật tuần trước

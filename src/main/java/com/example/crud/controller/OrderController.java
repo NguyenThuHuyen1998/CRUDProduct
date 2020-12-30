@@ -2,10 +2,12 @@ package com.example.crud.controller;
 
 import com.example.crud.constants.InputParam;
 import com.example.crud.entity.*;
+import com.example.crud.helper.TimeHelper;
 import com.example.crud.response.OrderResponse;
 import com.example.crud.output.OrderLineForm;
 import com.example.crud.service.*;
 import org.apache.commons.lang3.time.DateUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +35,11 @@ public class OrderController {
     private OrderLineService orderLineService;
     private SendEmailService emailService;
     private JwtService jwtService;
+    private VoucherService voucherService;
+    private ShipService shipService;
 
     @Autowired
-    public OrderController(OrderService orderService, CartService cartService, CartItemService cartItemService, UserService userService, SendEmailService service, OrderLineService orderLineService, JwtService jwtService) {
+    public OrderController(OrderService orderService, CartService cartService, CartItemService cartItemService, UserService userService, SendEmailService service, OrderLineService orderLineService, JwtService jwtService, ShipService shipService, VoucherService voucherService) {
         this.orderService = orderService;
         this.cartService = cartService;
         this.cartItemService = cartItemService;
@@ -43,48 +47,104 @@ public class OrderController {
         this.orderLineService = orderLineService;
         this.emailService= service;
         this.jwtService = jwtService;
+        this.shipService= shipService;
+        this.voucherService= voucherService;
     }
 
 
     //tạo mới đơn hàng
-    @CrossOrigin
-    @PostMapping(value = "/userPage/orders")
-    public ResponseEntity<Order> createOrder(HttpServletRequest request) {
-        Order order = null;
+//    @CrossOrigin
+//    @PostMapping(value = "/userPage/orders")
+//    public ResponseEntity<Order> createOrder(HttpServletRequest request) {
+//        Order order = null;
+//
+//        if (jwtService.isCustomer(request)) {
+//            try {
+//                long userId = jwtService.getCurrentUser(request).getUserId();
+//                List<CartItem> cartItemList = cartItemService.getListCartItemInCart(userId);
+//                User user = userService.findById(userId);
+//                Cart cart = cartService.getCartByUserId(userId);
+//                if (cartItemList != null && cartItemList.size() > 0) {
+//                    order = new Order(user, cart.getTotalMoney(), InputParam.PROCESSING, new Date().getTime());
+//                    orderService.save(order);
+//                    for (CartItem cartItem : cartItemList) {
+//                        OrderLine orderLine = new OrderLine(cartItem, order);
+//                        orderLineService.save(orderLine);
+//                        cartItemService.deleteCartItem(cartItem);
+//                    }
+//                    cart.setTotalMoney(0);
+//                    cartService.save(cart);
+//                    //set lại thời gian hoạt động cuối cùng để sau có thể xóa cart của user nếu đã 3 tháng không hoạt động
+//                    user.setLastActive(new Date().getTime());
+//                    userService.add(user);
+//                }
+//                if (order == null) {
+//                    return new ResponseEntity("Add product int cart!!", HttpStatus.NO_CONTENT);
+//                }
+//                return new ResponseEntity<>(order, HttpStatus.OK);
+//
+//            } catch (Exception e) {
+//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//            }
+//        }
+//        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
+//
+//    }
 
-        if (jwtService.isCustomer(request)) {
-            try {
-                long userId = jwtService.getCurrentUser(request).getUserId();
-                List<CartItem> cartItemList = cartItemService.getListCartItemInCart(userId);
-                User user = userService.findById(userId);
-                Cart cart = cartService.getCartByUserId(userId);
-                if (cartItemList != null && cartItemList.size() > 0) {
-                    order = new Order(user, cart.getTotalMoney(), InputParam.PROCESSING, new Date().getTime());
-                    orderService.save(order);
-                    for (CartItem cartItem : cartItemList) {
-                        OrderLine orderLine = new OrderLine(cartItem, order);
-                        orderLineService.save(orderLine);
-                        cartItemService.deleteCartItem(cartItem);
-                    }
-                    cart.setTotalMoney(0);
-                    cartService.save(cart);
-                    //set lại thời gian hoạt động cuối cùng để sau có thể xóa cart của user nếu đã 3 tháng không hoạt động
-                    user.setLastActive(new Date().getTime());
-                    userService.add(user);
-                }
-                if (order == null) {
-                    return new ResponseEntity("Add product int cart!!", HttpStatus.NO_CONTENT);
-                }
-                return new ResponseEntity<>(order, HttpStatus.OK);
-
-            } catch (Exception e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
+    //tạo đơn hàng mới từ giỏ hàng, điền các thông tin trong form ship, nhap ma giam gia
+    @PostMapping(value = "/userPage/order")
+    public ResponseEntity<Order> createOrder(@RequestBody String data,
+                                             HttpServletRequest request){
+        if(jwtService.isCustomer(request)){
+            User user= jwtService.getCurrentUser(request);
+            JSONObject jsonObject= new JSONObject(data);
+            Address address= new Address(jsonObject.toString());
+            address.setUser(user);
+            shipService.save(address);
+            Cart cart= cartService.getCartByUserId(user.getUserId());
         }
         return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
-
     }
 
+    @GetMapping(value = "/userPage/order")
+    public ResponseEntity<OrderResponse> getOrder(HttpServletRequest request){
+        if (jwtService.isCustomer(request)){
+            User user= jwtService.getCurrentUser(request);
+            OrderResponse orderResponse= orderService.createOrder(user);
+            return new ResponseEntity<>(orderResponse, HttpStatus.OK);
+        }
+        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+
+    @GetMapping(value = "/userPage/voucher")
+    public ResponseEntity<Cart> applyVoucher(@RequestBody String data,
+                                             HttpServletRequest request){
+        if (jwtService.isCustomer(request)) {
+            User user= jwtService.getCurrentUser(request);
+            Cart cart= cartService.getCartByUserId(user.getUserId());
+
+            JSONObject jsonObject= new JSONObject(data);
+            String code= jsonObject.getString("code");
+            List<Voucher> list= voucherService.getListVoucher();
+            Voucher voucher= null;
+            for (Voucher index: list){
+                if (index.getCode().equals(code)){
+                    voucher= index;
+                }
+            }
+            if (voucher!= null){
+                return new ResponseEntity("This code is not exist", HttpStatus.BAD_REQUEST);
+            }
+            TypeDiscount typeDiscount= voucher.getTypeDiscount();
+            double valueDiscount= voucher.getValueDiscount();
+            if (typeDiscount== TypeDiscount.PERCENT){
+                cart.setDiscount((cart.getTotalMoney())*valueDiscount/100);
+            }
+
+        }
+        return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
+    }
     //lấy danh sách đơn hàng của 1 user
     //user chỉ được lấy ds đơn hàng của mình nên bắt buộc có user-id
     @GetMapping(value = "/userPage/orders")
@@ -126,7 +186,7 @@ public class OrderController {
             }
             Map<String, Object> paging= new HashMap<>();
             int totalPage = (orderTotal.size()) / limit + ((orderTotal.size() % limit == 0) ? 0 : 1);
-            int totalCount=orderTotal.size();
+            int totalCount=orderFilter.size();
             paging.put(InputParam.RECORD_IN_PAGE, limit);
             paging.put(InputParam.TOTAL_COUNT, totalCount);
             paging.put(InputParam.CURRENT_PAGE, page);
@@ -137,7 +197,7 @@ public class OrderController {
         return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    //Xóa 1 đơn hàng
+    //Xóa 1 đơn hàng by user
     @DeleteMapping(value = "/userPage/orders/{order-id}")
     public ResponseEntity<Order> cancelOrder(@PathVariable("order-id") long orderId,
                                              HttpServletRequest request) {
@@ -157,7 +217,7 @@ public class OrderController {
 //                    for(OrderLine orderLine: orderLines){
 //                        orderLineService.remove(orderLine);
 //                    }
-                    order.setStatus(InputParam.CANCEL);
+                    order.setStatus(OrderStatus.CANCEL);
                     orderService.save(order);
                     return new ResponseEntity<>(HttpStatus.OK);
                 }
@@ -202,10 +262,10 @@ public class OrderController {
             try{
                 Order order= orderService.findById(orderId);
                 User user= order.getUser();
-                if(userId != user.getUserId() || !order.getStatus().equals(InputParam.SHIPPING)){
+                if(userId != user.getUserId() || order.getStatus()!= OrderStatus.SHIPPING){
                     return new ResponseEntity("Login before processing", HttpStatus.METHOD_NOT_ALLOWED);
                 }
-                order.setStatus(InputParam.FINISHED);
+                order.setStatus(OrderStatus.FINISHED);
                 orderService.save(order);
             }
             catch (Exception e){
@@ -296,13 +356,13 @@ public class OrderController {
         if(jwtService.isAdmin(request)){
             try{
                 Order order= orderService.findById(orderId);
-                if(order.getStatus().equals(InputParam.PROCESSING)){
+                if(order.getStatus()== OrderStatus.PROCESSING){
                     User user= order.getUser();
                     if(user == null){
                         logger.error("User is not exist, need delete this order");
                         userService.delete(user);
                     }
-                    order.setStatus(InputParam.SHIPPING);
+                    order.setStatus(OrderStatus.SHIPPING);
                     orderService.save(order);
 
                     // send email notification
@@ -340,8 +400,7 @@ public class OrderController {
 //                for(OrderLine orderLine: orderLines){
 //                    orderLineService.remove(orderLine);
 //                }
-                order.setStatus(InputParam.CANCEL);
-                orderService.save(order);
+                orderService.remove(order);
                 return new ResponseEntity("Success", HttpStatus.OK);
             }
             catch (Exception e){

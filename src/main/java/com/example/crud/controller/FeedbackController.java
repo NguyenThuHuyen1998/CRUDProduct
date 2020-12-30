@@ -98,8 +98,7 @@ public class FeedbackController {
 
     @GetMapping(value = "/feedbacks")
     public ResponseEntity<FeedBack> getListFeedBack(@RequestParam(required = false, defaultValue = "10") int limit,
-                                                    @RequestParam(required = false, defaultValue = "1") int page,
-                                                    @RequestParam(required = false, defaultValue = "-1") int star){
+                                                    @RequestParam(required = false, defaultValue = "1") int page){
         try {
             List<FeedBack> feedBacks= feedbackService.findAll();
             feedBacks= feedbackService.sortByDatePost(feedBacks);

@@ -74,20 +74,20 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> filterProduct(Map<String, Object> filter) throws ParseException {
         double priceMin= (double) filter.get(InputParam.PRICE_MIN);
         double priceMax= (double) filter.get(InputParam.PRICE_MAX);
-        String timeStart= (String) filter.get(InputParam.TIME_START);
-        String timeEnd= (String) filter.get(InputParam.TIME_END);
+//        String timeStart= (String) filter.get(InputParam.TIME_START);
+//        String timeEnd= (String) filter.get(InputParam.TIME_END);
         long categoryId= (long) filter.get(InputParam.CATEGORY_ID);
         String keyword= (String) filter.get(InputParam.KEY_WORD);
         String sortBy= (String) filter.get(InputParam.SORT_BY);
 
         Predicate<Product> predicate= null;
         PredicateProductFilter productFilter = PredicateProductFilter.getInstance();
-        Predicate<Product> checkPrice = productFilter.checkDateAdd(timeStart, timeEnd);
-        Predicate<Product> checkDateAdd = productFilter.checkPrice(priceMin, priceMax);
+        Predicate<Product> checkPrice = productFilter.checkPrice(priceMin, priceMax);
+//        Predicate<Product> checkDateAdd = productFilter.checkPrice(priceMin, priceMax);
         Predicate<Product> checkKeyword = productFilter.checkKeyword(keyword);
         Predicate<Product> checkCategory= productFilter.checkCategory(categoryId);
         Predicate<Product> checkActive= productFilter.checkActive();
-        predicate = checkPrice.and(checkDateAdd).and(checkKeyword).and(checkCategory).and(checkActive);
+        predicate = checkPrice.and(checkKeyword).and(checkCategory).and(checkActive);
         List<Product> productList= filterProduct(findAllProduct(), predicate);
         productList= sortByDateAdd(productList, sortBy);
         return productList;

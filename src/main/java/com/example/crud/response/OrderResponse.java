@@ -1,6 +1,9 @@
 package com.example.crud.response;
 
 import com.example.crud.entity.Order;
+import com.example.crud.entity.OrderStatus;
+import com.example.crud.entity.TypeDiscount;
+import com.example.crud.helper.TimeHelper;
 import com.example.crud.output.OrderLineForm;
 
 import java.io.Serializable;
@@ -14,9 +17,11 @@ public class OrderResponse implements Serializable {
 
     private long orderId;
     private long userId;
-    private long dateSell;
-    private String status;
-    private double totalPrice;
+    private String time;
+    private OrderStatus status;
+    private double total;
+    private double realPay;
+    private double voucher;
     private List<OrderLineForm> orderLineList;
 
     public OrderResponse(){
@@ -25,38 +30,29 @@ public class OrderResponse implements Serializable {
     public OrderResponse(Order order, List<OrderLineForm> orderLineForms){
         this.orderId= order.getOrderId();
         this.userId= order.getUser().getUserId();
-        this.dateSell= order.getDateSell();
+//        this.time= TimeHelper.getInstance().
         this.status= order.getStatus();
-        this.totalPrice= order.getTotalPrice();
+        this.total= order.getTotal();
+        if (order.getVoucher().getTypeDiscount()== TypeDiscount.PERCENT){
+            double value= order.getVoucher().getValueDiscount();
+            this.voucher= value* order.getTotal();
+        }
+        else {
+            this.voucher= order.getVoucher().getValueDiscount();
+        }
+        this.realPay= order.getTotal()- this.voucher;
         this.orderLineList= orderLineForms;
     }
-    public OrderResponse(long orderId, long userId, long dateSell, String status, double totalPrice, List<OrderLineForm> orderLineList){
+    public OrderResponse(long orderId, long userId, String time, OrderStatus status, double total, double voucher, double realPay, List<OrderLineForm> orderLineList){
         this.orderId= orderId;
         this.userId= userId;
-        this.dateSell= dateSell;
+        this.time= time;
         this.status= status;
-        this.totalPrice= totalPrice;
+        this.voucher= voucher;
+        this.total= total;
+        this.realPay= realPay;
         this.orderLineList= orderLineList;
     }
-
-//    public OrderForm(Order order){
-//        this.orderId= order.getOrderId();
-//        this.userId= order.getUser().getUserId();
-//        this.dateSell= order.getDateSell();
-//        this.status= order.getStatus();
-//        this.totalPrice= order.getTotalPrice();
-//        this.orderLineList = order.getOrderLine() == null ? null :
-//                commentBO.getCommentBOs().stream().map(cmt -> {
-//                    CommentDTO commentDTO = new CommentDTO();
-//                    commentDTO.setId(cmt.getId());
-//                    commentDTO.setContent(cmt.getContent());
-//                    commentDTO.setCreatedAt(cmt.getCreatedAt());
-//                    commentDTO.setParentId(cmt.getCommentBO() == null ? null : cmt.getCommentBO().getId());
-//                    commentDTO.setCreatedById(cmt.getCreatedBy() == null ? null : cmt.getCreatedBy().getId());
-//                    commentDTO.setCreatedBy(cmt.getCreatedBy() == null ? null :cmt.getCreatedBy().getName());
-//                    return commentDTO;
-//                }).collect(Collectors.toList());
-//    }
 
     public long getOrderId() {
         return orderId;
@@ -74,28 +70,44 @@ public class OrderResponse implements Serializable {
         this.userId = userId;
     }
 
-    public long getDateSell() {
-        return dateSell;
+    public String getTime() {
+        return time;
     }
 
-    public void setDateSell(long dateSell) {
-        this.dateSell = dateSell;
+    public void setTime(String time) {
+        this.time = time;
     }
 
-    public String getStatus() {
+    public OrderStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(OrderStatus status) {
         this.status = status;
     }
 
-    public double getTotalPrice() {
-        return totalPrice;
+    public double getTotal() {
+        return total;
     }
 
-    public void setTotalPrice(double totalPrice) {
-        this.totalPrice = totalPrice;
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public double getRealPay() {
+        return realPay;
+    }
+
+    public void setRealPay(double realPay) {
+        this.realPay = realPay;
+    }
+
+    public double getVoucher() {
+        return voucher;
+    }
+
+    public void setVoucher(double voucher) {
+        this.voucher = voucher;
     }
 
     public List<OrderLineForm> getOrderLineList() {

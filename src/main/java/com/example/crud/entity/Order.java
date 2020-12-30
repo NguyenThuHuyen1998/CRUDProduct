@@ -1,12 +1,8 @@
 package com.example.crud.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
 
 /*
     created by HuyenNgTn on 15/11/2020
@@ -25,27 +21,47 @@ public class Order implements Serializable {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "order")
-//    private List<OrderLine> orderLines;
+    @Column(name = "time")
+    private long time;
 
+    @Column(name = "total")
+    private double total;
 
-    @Column(name = "date_sell")
-    private long dateSell;
-
-    @Column(name = "total_price")
-    private double totalPrice;
+    @Column(name = "real_pay")
+    private double realPay;
 
     @Column(name = "status")
-    private String status;
+    private OrderStatus status;
 
-    public Order() {
+    @Column(name = "note")
+    private String note;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address", nullable = false)
+    private Address address;
+
+
+    @Column(name = "voucher_id", nullable = true)
+    private Voucher voucher;
+
+
+    public Order(User user, OrderStatus status, long time) {
+        this.user = user;
+        this.status = status;
+        this.time= time;
     }
 
-    public Order(User user, double totalPrice, String status, long dateSell) {
+
+    public Order(long orderId, User user, long time, double total, double realPay, OrderStatus status, String note, Address address, Voucher voucher) {
+        this.orderId = orderId;
         this.user = user;
-        this.dateSell= dateSell;
-        this.totalPrice = totalPrice;
+        this.time = time;
+        this.total = total;
+        this.realPay = realPay;
         this.status = status;
+        this.note = note;
+        this.address = address;
+        this.voucher = voucher;
     }
 
     public long getOrderId() {
@@ -63,44 +79,62 @@ public class Order implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
-//
-//    public List<OrderLine> getOrderLines() {
-//        return orderLines;
-//    }
-//
-//    public void setOrderLines(List<OrderLine> orderLines) {
-//        this.orderLines = orderLines;
-//    }
-//
-//    public void addOrderLine(OrderLine orderLine){
-//        this.orderLine.add(orderLine);
-//    }
 
-    public double getTotalPrice() {
-        return totalPrice;
+    public long getTime() {
+        return time;
     }
 
-    public void setTotalPrice(double totalPrice) {
-        this.totalPrice = totalPrice;
+    public void setTime(long time) {
+        this.time = time;
     }
 
-    public String getStatus() {
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public double getRealPay() {
+        return realPay;
+    }
+
+    public void setRealPay(double realPay) {
+        this.realPay = realPay;
+    }
+
+    public OrderStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(OrderStatus status) {
         this.status = status;
     }
 
-//    public int getNumberOrderLine(){
-//        return orderLine.size();
-//    }
-
-    public long getDateSell() {
-        return dateSell;
+    public String getNote() {
+        return note;
     }
 
-    public void setDateSell(long dateSell) {
-        this.dateSell = dateSell;
+    public void setNote(String note) {
+        this.note = note;
     }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public Voucher getVoucher() {
+        return voucher;
+    }
+
+    public void setVoucher(Voucher voucher) {
+        this.voucher = voucher;
+    }
+
+
 }
